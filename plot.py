@@ -21,10 +21,12 @@ Requirements:
 
 '''
 
+import matplotlib.pyplot as plt
+
 # Plot constants
 plotSettings = {
-	"labelH": "*INSERT LABEL*",
-	"labelV": "*INSERT LABEL*",
+	"labelX": "*INSERT LABEL*",
+	"labelY": "*INSERT LABEL*",
 	}
 
 filename = "data.csv"
@@ -40,7 +42,7 @@ def openCSV(filename):
 	return content
 
 def parseData(rawData):
-	data = []
+	data = [[], []]
 	for lineNum, line in enumerate(rawData):
 		rawVals = line.split(",")
 		
@@ -53,20 +55,26 @@ def parseData(rawData):
 		except ValueError:
 			lineWarning(lineNum, line, "does not contain 2 valid numbers")
 		else:
-			data.append(vals)
+			data[0].append(vals[0])
+			data[1].append(vals[1])
 
 	return data
 
-def buildPlot(data):
-	pass
+def buildPlot(data, plotSettings):
+	plt.plot(data[0], data[1])
+
+	plt.xlabel(plotSettings.get("labelX", "No Label"))
+	plt.ylabel(plotSettings.get("labelY", "No Label"))
+	plt.title(plotSettings.get("Title", "No Title"))
+	plt.grid(True)
+	plt.show()
 
 def lineWarning(lineNum, line, error):
 	print("WARNING: Line ", lineNum, ": \"", line[:-1], "\" ", error, ".", sep='')
 
 rawData = openCSV(filename)
 data = parseData(rawData)
-print(data)
-buildPlot(data)
+buildPlot(data, plotSettings)
 
 
 

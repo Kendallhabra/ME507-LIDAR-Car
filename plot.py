@@ -3,26 +3,10 @@ Plot Python File
 
 This file opens, parses, and plots the data in a CSV file.
 
+The CSV file is selected with the -f flag or defaults to data.csv.
+
 Written by Kendall Searing for ME507-01 Homework 0
 2016-10-26
-
-Requirements:
-	CSV File
-		Exactly 2 columns
-		Separated by CSV
-		May be whitespace
-		Contains ints and floats
-	Reject bad lines (print warning message)
-	Graph
-		Must be autoscaled
-		Horizontal and vertical axis labels
-		Axis labels must be SFW Python references/puns
-	File must be named searing.py
-	Cite all borrowed code
-	Submit by emailing code as an attachment to me@me.me.calpoly.edu
-	Must include proper comments and docstrings
-	Must be able to run from the terminal and use filename as an argument
-
 '''
 
 import matplotlib.pyplot as plt

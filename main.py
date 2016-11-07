@@ -5,14 +5,20 @@ Main
 This file does a thing...
 '''
 
+import time
 import pyb
 import micropython
 import gc
+import imu
 
 micropython.alloc_emergency_exception_buf(100)
 
+bno = imu.BNO055()
+print(bno.begin())
+
 def read():
-	pass
+	print(bno.read_euler())
+	print(bno.get_system_status())
 def toggleLED():
 	pyb.LED(4).toggle()
 def sayHello():
@@ -22,15 +28,14 @@ def sayTime():
 def garbageCollect():
 	gc.collect()
 
-
 # Each list in tasks holds [function, period in ms, calls, priority].
 # Calls starts at 0 and is used to control function calls.
 # Setting a higher priority will overwrite a lower priority in a given call of mainLoop.
 tasks = [
-	[read, 10, 0, 0],
+	[read, 1000, 0, 0],
 	[toggleLED, 100, 0, 1],
 	[sayHello, 10000, 0, 0],
-	[sayTime, 2000, 0, 2],
+	[sayTime, 2000, 0, 0],
 	[garbageCollect, 1000, 0, 0],
 	]
 
@@ -50,10 +55,13 @@ def mainLoop():
 
 gc.collect()
 
+
+
+
 print("Running")
 while(True):
 	mainLoop()
-	pyb.delay(1)
+	#pyb.delay(1)
 '''
 tim = pyb.Timer(4, freq=10)
 tim.callback(lambda t: mainLoop)

@@ -3,6 +3,8 @@
 
 import array
 import math
+import re #For may print only
+
 
 class mapObj(object):
     '''
@@ -178,12 +180,21 @@ class mapObj(object):
         '''
         Prints the Map in the best readable formate I have found so far without 3rd party modules
         '''
-        print('\n                          **************Printing map***************\n')
+        print('\n*********Printing map***********\n')
         self.iterator = 1
         while self.iterator <= self.arrayLength:
             rowStart = int(self.arrayWidth*(self.iterator-1))
             rowEnd = int(self.arrayWidth*self.iterator)
-            print(testmap.map[rowStart:rowEnd])
+            currentMapString = str(testmap.map[rowStart:rowEnd])
+            currentMapString = currentMapString.replace("bytearray", "")
+            currentMapString = currentMapString.replace("(b'", "")
+            currentMapString = currentMapString.replace("')", "")
+            currentMapString = currentMapString.replace("x", "")
+            #currentMapString = currentMapString[1::3]#attempt to avoid regular expressions 
+            #print(currentMapString[1::2],'')
+            currentMapString = re.sub('[^\w]', '', currentMapString)
+            print(currentMapString[1::2],'')
+            #print(str(testmap.map[rowStart:rowEnd]))
             self.iterator += 1
 
         return   
@@ -199,10 +210,10 @@ if __name__ == '__main__':
     class scan():
         print('scan Object created')
     
-    scan.posX=array.array('d',[1,2,1,5,5.5,-4.5,-5,0,0,0,0])
-    scan.posY=array.array('d',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5])    
-    scan.headingPlusServoAngle=array.array('d',[-33,-33,-33,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
-    scan.distance=array.array('d',[1,1,1,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
+    scan.posX=array.array('d',[1,2,1,5,5.5,-4.5,-5,0,0,0,0,1,0,-1,0,.5,0,-.5,0])
+    scan.posY=array.array('d',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5])    
+    scan.headingPlusServoAngle=array.array('d',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
+    scan.distance=array.array('d',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
     #create test map
     testmap = mapObj(mapheight, mapWidth, resolution) 
     #Test run mapTask()

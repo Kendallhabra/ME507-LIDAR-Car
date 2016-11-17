@@ -9,7 +9,7 @@ class mapObj(object):
     Creates and adds anylzed sensor data to the map data. 
     '''
 
-    def __init__(self,mapheight, mapWidth, resolution, mapState):
+    def __init__(self,mapheight, mapWidth, resolution):
         '''
         Creates the map first time map is run and ajusts the array size (lenght and width) in the case that they are not interger values.
         '''
@@ -23,13 +23,15 @@ class mapObj(object):
         print(self.middleElement)
         
         #Ensure that if map/length was not an interger the true map size is returned
-        self.mapheight = self.arrayLength*resolution
-        self.mapHeight = self.arrayWidth*resolution
+        self.mapHeight = self.arrayLength*resolution
+        self.mapWidth = self.arrayWidth*resolution
         
         #defines the byte array
         self.map = bytearray(self.arrayElements)
         
-        
+        #Defines obstical array
+        self.obsXCoord = array.array('d')
+        self.obsYCoord = array.array('d')
         print('init Success\n')
         return
 
@@ -38,27 +40,29 @@ class mapObj(object):
         Creates and addes anylzed sensor data to the map data
         '''
         print('mapTask')
-        print(self.map)
+        self.printMap()
         self.writemap(scan)
         return
 
     
     def writemap(self,scan):
         '''
-        
+        This function takes all scan data and addes it to the map
         '''
         #print(scan.posX[-1])
         
-        print('writemap\n')
+        print('\n\nwritemap is being run be mapTask\n')
         
         self.exitFlag = 0
         while self.exitFlag == 0:
+            '''
+            In the event that the following if loop needs to be stopped and memory allocated to other taskes the flag can be changed to 1 thus exiting
+            '''
             self.sensorDataLenght = len(scan.posX)
             if  self.sensorDataLenght != 0:
-                
-                #Sensor_data_curr = Sensor_data[-1] #takes last point in sensor data
-                #Sensor_data.pop(-1) # Removes the Sensor_data_curr point from list Sensor_data
-                
+                '''
+                Iterates through all of the scan data until it has all been addaed to the map
+                '''
                 self.posX = scan.posX[-1] 
                 scan.posX.pop()
                 self.posY = scan.posY[-1]
@@ -91,51 +95,98 @@ class mapObj(object):
                 self.numberColumnRight = self.arrayWidth/2
                 
                 if self.newDataPtStep[1] > self.numberRowAboveOrgin: #ensures point within 'Northern' bound
-                    print('Out of map range Y upper!!!!!!!')
+                    print('writeMap Out of map range Y upper!!!!!!!!!!!!!!!!!!!!!!!')
                     print('numberRowAboveOrgin',self.numberRowAboveOrgin)
                 elif self.newDataPtStep[1] < -self.numberRowBlowOrgin:  #ensures point within 'Southern' bound
-                    print('Out of map range Y lower!!!!!!!')
+                    print('writeMap Out of map range Y lower!!!!!!!!!!!!!!!!!!!!!!!')
                     print('numberRowBelowOrgin',self.numberRowBlowOrgin)
                 elif self.newDataPtStep[0] > self.numberColumnRight: #ensures point within 'Eastern' bound
-                    print('Out of map range X upper!!!!!!!')
+                    print('writeMap Out of map range X upper!!!!!!!!!!!!!!!!!!!!!!!')
                     print('numberColumnRight',self.numberColumnRight)
                 elif self.newDataPtStep[0] < -self.numberColumnLeft: #ensures point within 'Western' bound
-                    print('Out of map range X lower!!!!!!!')
+                    print('writeMap Out of map range X lower!!!!!!!!!!!!!!!!!!!!!!!')
                     print('numberColumnLeft',self.numberColumnLeft)
                 else:
-                    self.map[self.middleElement+self.newDataPtStep[0]-self.newDataPtStep[1]*self.arrayWidth]=1
-                
+                    self.map[self.middleElement-1+self.newDataPtStep[0]-self.newDataPtStep[1]*self.arrayWidth]=1
                 
                 print('\n')
                 #print(self.map)
             else:
                 self.exitFlag = 1
-                print(self.map)
+                #print(self.map)
                 
                 print('finished loop')
-            
-        
-        
         
         print('writemap Success\n')
         return 
-
-    #*********Testing*************
     
-    def readPoint (x,y):
+    def readPoint (self,x,y):
         '''
+        Reads a specified coordinate
         '''
+        self.newDataRead = [round(x/resolution),round(y/resolution)]
+        #print('Print',x,',',y)
+        
+        if self.newDataRead[1] > self.numberRowAboveOrgin: #ensures point within 'Northern' bound
+            print('self.newDataRead',self.newDataRead)
+            print('self.numberRowAboveOrgin',self.numberRowAboveOrgin)
+            print('readPoint Out of map range Y upper, assume wall!!!!!!!!!!!!!!!!!!!!!!!')
+            print('numberRowAboveOrgin',self.numberRowAboveOrgin)
+            value = 1 #We can't go off the map so we assume its an object to prevent nav from doing otherwise
+        elif self.newDataRead[1] < -self.numberRowBlowOrgin:  #ensures point within 'Southern' bound
+            print('readPoint Out of map range Y lower, assume wall!!!!!!!!!!!!!!!!!!!!!!!')
+            print('numberRowBelowOrgin',self.numberRowBlowOrgin)
+            value = 1 
+        elif self.newDataRead[0] > self.numberColumnRight: #ensures point within 'Eastern' bound
+            print('readPoint Out of map range X upper, assume wall!!!!!!!!!!!!!!!!!!!!!!!')
+            print('numberColumnRight',self.numberColumnRight)
+            value = 1
+        elif self.newDataRead[0] < -self.numberColumnLeft: #ensures point within 'Western' bound
+            print('readPoint Out of map range X lower, assume wall!!!!!!!!!!!!!!!!!!!!!!!')
+            print('numberColumnLeft',self.numberColumnLeft)
+            value = 1
+        else:
+            value = self.map[self.middleElement-1+self.newDataRead[0]-self.newDataRead[1]*self.arrayWidth] #-1 because count from 0 no du 
+            #print('Bit: ',value)
+            
+        return value
+    
+    def obsticals (self):
+        '''
+        Returns the points in map that have obsticals in puts them in an obsticalx and obsticaly array in (*RESOLUTION UNITS*) 
+        So if resoltion is 0.5 meters and x = 2 => 4 meters This should help navigation we could change this easily if needed.
+        '''
+        xSearch = 0 
+        ySreach = 0
+        for element in self.map:
+            if self.map[xSearch+ySreach] == 1:#This is extremely broaring right now. I added this but now think we will not have the memory for object arrays.
+                pass
+        
+        return
+        
+        
+        
+    def printMap(self):
+        '''
+        Prints the Map in the best readable formate I have found so far without 3rd party modules
+        '''
+        self.iterator = 1
+        while self.iterator <= self.arrayLength:
+            rowStart = int(self.arrayWidth*(self.iterator-1))
+            rowEnd = int(self.arrayWidth*self.iterator)
+            print(testmap.map[rowStart:rowEnd])
+            self.iterator += 1
 
+        return   
+            
 if __name__ == '__main__':        
     #***********Test code**************
-
+    #don't Change or it will messup current validation based on array size
     mapheight = 10 #meters (height) Ensure whole numbers 20X20,10x10 I want to avoid 21x21 elements if you choose 10.5
     mapWidth =  10 #meters (witth)
     resolution = .5 #meters Even fraction
-    mapState = 0
     
-    
-    
+
     class scan():
         print('scan Object created')
     
@@ -148,9 +199,34 @@ if __name__ == '__main__':
     scan.distance=array.array('d',[1,1,1,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
     
             
-    testmap = mapObj(mapheight, mapWidth, resolution,mapState)
+    testmap = mapObj(mapheight, mapWidth, resolution)
+    
+    
+    
     testmap.mapTask(scan)
-    print('finished mapTask look above matrix to see it in action.  I am currently testing the matrix limits with the points at bound of a 10 meter matrix. I will remove prints later and improve comments.')
+    
+    print('Print map')
+    testmap.printMap()
+    print('\n\nFinished mapTask look above matrix to see it in action.  I am currently testing the matrix limits \nwith the points at bound of a 10 meter matrix. I will remove prints later and improve comments.')
+    print('\n\n')
+    
+    #Testing readPoint
+    print('Testing readPoint')
+    
+    a = testmap.readPoint(0,5)
+    print('(0,5) bit:',a,'\n')
+    
+    a = testmap.readPoint(5,0)
+    print('(5,0) bit:',a,'\n')
+    
+    a= testmap.readPoint(0,0)
+    print('(0,0) bit:',a,'\n')
+    
+    a= testmap.readPoint(0,5.5)
+    print('(0,5.5) bit:',a)
+    
+    
+    #testmap.obsticals() #will likely scrap and put in navigation.
     
     
     

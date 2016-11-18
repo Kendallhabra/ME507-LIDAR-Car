@@ -8,14 +8,14 @@ import re #For may print only
 
 class mapObj(object):
     '''
-    Creates and adds anylzed sensor data to the map data. 
+    Creates and adds anylzed sensor data to the map data. It stores in in the class as self.map and can read the map with readPoint()
     '''
 
     def __init__(self,mapheight, mapWidth, resolution):
         '''
         Creates the map first time map is run and ajusts the array size (lenght and width) in the case that they are not interger values.
         '''
-        print('initializing mapTask')
+        print('Initializing mapTask.....')
         #Determines the number of elements in array
         self.arrayLength = int(mapheight/resolution)
         self.arrayWidth = int(mapWidth/resolution)
@@ -27,7 +27,7 @@ class mapObj(object):
         #Ensure that if map/length was not an interger the true map size is returned
         self.mapHeight = self.arrayLength*resolution
         self.mapWidth = self.arrayWidth*resolution
-        
+        self.resolution = resolution
         #defines the byte array
         self.map = bytearray(self.arrayElements)
         
@@ -160,27 +160,15 @@ class mapObj(object):
             #print('Bit: ',value)
             
         return value
-    
-    def obsticals (self):
-        '''
-        Returns the points in map that have obsticals in puts them in an obsticalx and obsticaly array in (*RESOLUTION UNITS*) 
-        So if resoltion is 0.5 meters and x = 2 => 4 meters This should help navigation we could change this easily if needed.
-        '''
-        xSearch = 0 
-        ySreach = 0
-        for element in self.map:
-            if self.map[xSearch+ySreach] == 1:#This is extremely broaring right now. I added this but now think we will not have the memory for object arrays.
-                pass
-        
-        return
-        
-        
         
     def printMap(self):
         '''
         Prints the Map in the best readable formate I have found so far without 3rd party modules
         '''
-        print('\n*********Printing map***********\n')
+        print('\n********************Printing map*********************\n')
+        print('Map width:',self.arrayWidth*resolution,'m Map Length:', self.arrayLength*resolution,'m Resolution', resolution,'m\n')
+        print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
+        print('Extremes in meters:\n(',-self.numberColumnLeft*resolution,self.numberRowAboveOrgin*resolution,') (',self.numberColumnRight*resolution,self.numberRowAboveOrgin*resolution,') (',self.numberColumnRight*resolution,-self.numberRowBlowOrgin*resolution,') (',-self.numberColumnLeft*resolution,-self.numberRowBlowOrgin*resolution,')\n')
         self.iterator = 1
         while self.iterator <= self.arrayLength:
             rowStart = int(self.arrayWidth*(self.iterator-1))
@@ -190,10 +178,10 @@ class mapObj(object):
             currentMapString = currentMapString.replace("(b'", "")
             currentMapString = currentMapString.replace("')", "")
             currentMapString = currentMapString.replace("x", "")
-            #currentMapString = currentMapString[1::3]#attempt to avoid regular expressions 
+            #currentMapString = currentMapString[2::3]#attempt to avoid regular expressions 
             #print(currentMapString[1::2],'')
             currentMapString = re.sub('[^\w]', '', currentMapString)
-            print(currentMapString[1::2],'')
+            print(currentMapString[1::2])
             #print(str(testmap.map[rowStart:rowEnd]))
             self.iterator += 1
 
@@ -202,9 +190,9 @@ class mapObj(object):
 if __name__ == '__main__':        
     #***********Test code**************
     #don't Change or it will messup current validation based on array size
-    mapheight = 10 #meters (height) Ensure whole numbers 20X20,10x10 I want to avoid 21x21 elements if you choose 10.5
-    mapWidth =  10 #meters (witth)
-    resolution = .5 #meters Even fraction
+    mapheight = 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
+    mapWidth =  10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
+    resolution = .5 #meters Even fraction Note: see previous note 
     
 #Test scan array********************************************************
     class scan():

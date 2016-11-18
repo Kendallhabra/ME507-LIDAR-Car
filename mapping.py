@@ -3,7 +3,7 @@
 
 import array
 import math
-import re #For may print only
+
 
 
 class mapObj(object):
@@ -136,22 +136,22 @@ class mapObj(object):
         if self.newDataRead[1] > self.numberRowAboveOrgin: #ensures point within 'Northern' bound
             #print('self.newDataRead',self.newDataRead)
             #print('self.numberRowAboveOrgin',self.numberRowAboveOrgin)            
-            print('\n(readPoint Warning) readPoint Out of map range Y upper, assume wall!!!!!!!!!!!!!!!!!!!!!!!')
+            print('\n(readPoint Warning) readPoint Out of map range Y upper, assume wall!!!!!!!!!!!!!')
             print('Point in steps',self.newDataRead)
             print('numberRowAboveOrgin',self.numberRowAboveOrgin,'\n')
             value = 1 #We can't go off the map so we assume its an object to prevent nav from doing otherwise
         elif self.newDataRead[1] < -self.numberRowBlowOrgin:  #ensures point within 'Southern' bound
-            print('\n(readPoint Warning) readPoint Out of map range Y lower, assume wall!!!!!!!!!!!!!!!!!!!!!!!')
+            print('\n(readPoint Warning) readPoint Out of map range Y lower, assume wall!!!!!!!!!!!!!')
             print('Point in steps',self.newDataRead)
             print('numberRowBelowOrgin',self.numberRowBlowOrgin,'\n')
             value = 1 
         elif self.newDataRead[0] > self.numberColumnRight: #ensures point within 'Eastern' bound
-            print('\n(readPoint Warning) readPoint Out of map range X upper, assume wall!!!!!!!!!!!!!!!!!!!!!!!')
+            print('\n(readPoint Warning) readPoint Out of map range X upper, assume wall!!!!!!!!!!!!!')
             print('Point in steps',self.newDataRead)
             print('numberColumnRight',self.numberColumnRight,'\n')
             value = 1
         elif self.newDataRead[0] < -self.numberColumnLeft: #ensures point within 'Western' bound
-            print('\n(readPoint Warning) readPoint Out of map range X lower, assume wall!!!!!!!!!!!!!!!!!!!!!!!')
+            print('\n(readPoint Warning) readPoint Out of map range X lower, assume wall!!!!!!!!!!!!!')
             print('Point in steps',self.newDataRead)
             print('numberColumnLeft',self.numberColumnLeft,'\n')
             value = 1
@@ -161,7 +161,7 @@ class mapObj(object):
             
         return value
         
-    def printMap(self):
+    def printMap(self): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
         '''
         Prints the Map in the best readable formate I have found so far without 3rd party modules
         '''
@@ -169,21 +169,22 @@ class mapObj(object):
         print('Map width:',self.arrayWidth*resolution,'m Map Length:', self.arrayLength*resolution,'m Resolution', resolution,'m\n')
         print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
         print('Extremes in meters:\n(',-self.numberColumnLeft*resolution,self.numberRowAboveOrgin*resolution,') (',self.numberColumnRight*resolution,self.numberRowAboveOrgin*resolution,') (',self.numberColumnRight*resolution,-self.numberRowBlowOrgin*resolution,') (',-self.numberColumnLeft*resolution,-self.numberRowBlowOrgin*resolution,')\n')
-        self.iterator = 1
-        while self.iterator <= self.arrayLength:
-            rowStart = int(self.arrayWidth*(self.iterator-1))
-            rowEnd = int(self.arrayWidth*self.iterator)
-            currentMapString = str(testmap.map[rowStart:rowEnd])
-            currentMapString = currentMapString.replace("bytearray", "")
-            currentMapString = currentMapString.replace("(b'", "")
-            currentMapString = currentMapString.replace("')", "")
-            currentMapString = currentMapString.replace("x", "")
-            #currentMapString = currentMapString[2::3]#attempt to avoid regular expressions 
-            #print(currentMapString[1::2],'')
-            currentMapString = re.sub('[^\w]', '', currentMapString)
-            print(currentMapString[1::2])
-            #print(str(testmap.map[rowStart:rowEnd]))
-            self.iterator += 1
+        self.iterateCol = 0
+        self.iterateRow = 0
+        exitFlag = 0
+        while exitFlag == 0:
+            '''
+            Iterates through each bit printing only the bit with no spaces. 
+            '''
+            print(self.map[self.iterateRow*self.arrayLength+self.iterateCol], end="")#printing a single bit
+            self.iterateCol +=1
+            
+            if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:#If map complete we exit
+                exitFlag = 1
+            elif self.iterateCol == self.arrayWidth:#otherwise if the end of a row has been reached we move to the next row
+                self.iterateRow +=1 
+                self.iterateCol = 0
+                print(end="\n")
 
         return   
             
@@ -198,10 +199,10 @@ if __name__ == '__main__':
     class scan():
         print('scan Object created')
     
-    scan.posX=array.array('d',[1,2,1,5,5.5,-4.5,-5,0,0,0,0,1,0,-1,0,.5,0,-.5,0])
-    scan.posY=array.array('d',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5])    
-    scan.headingPlusServoAngle=array.array('d',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
-    scan.distance=array.array('d',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
+    scan.posX=array.array('f',[1,2,1,5,5.5,-4.5,-5,0,0,0,0,1,0,-1,0,.5,0,-.5,0])
+    scan.posY=array.array('f',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5])    
+    scan.headingPlusServoAngle=array.array('f',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
+    scan.distance=array.array('f',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
     #create test map
     testmap = mapObj(mapheight, mapWidth, resolution) 
     #Test run mapTask()

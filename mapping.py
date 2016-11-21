@@ -11,16 +11,24 @@ class mapObj(object):
     Creates and adds anylzed sensor data to the map data. It stores in in the class as self.map and can read the map with readPoint()
     '''
 
-    def __init__(self,mapheight, mapWidth, resolution):
+    def __init__(self,mapHeight, mapWidth, resolution):
         '''
         Creates the map first time map is run and ajusts the array size (lenght and width) in the case that they are not interger values.
         '''
+        
         print('Initializing mapTask.....')
         #Determines the number of elements in array
-        self.arrayLength = int(mapheight/resolution)
+        self.arrayLength = int(mapHeight/resolution)
         self.arrayWidth = int(mapWidth/resolution)
         self.arrayElements = self.arrayLength*self.arrayWidth
-        print('self.arrayElements',self.arrayElements)
+        if self.arrayElements%2 !=0 or self.arrayLength%2 !=0 or self.arrayWidth%2 !=0:
+            print('Warning!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+            print(' * Number of elements in a row and column must be even!!!!!!!!!!!!!')
+            print(' * Number of elements in array must be even!!!!!!!!!!!!!!!!!!!!!!!!')
+            
+        print('arrayElements',self.arrayElements)
+        print('arrayWidth',self.arrayWidth)
+        print('arrayLength',self.arrayLength)
         self.middleElement = round(self.arrayElements/2+self.arrayWidth/2)
         print('self.middleElement',self.middleElement,'\n')
         
@@ -37,21 +45,21 @@ class mapObj(object):
         #print('init Success\n')
         return
 
-    def mapTask (self,scan):
+    def mapTask (self,scanMain):
         '''
         Creates and addes anylzed sensor data to the map data
         '''
         #print('mapTask')
         #self.printMap()
-        self.writemap(scan)
+        self.writemap(scanMain)
         return
 
     
-    def writemap(self,scan):
+    def writemap(self,scanMain):
         '''
-        This function takes all scan data and addes it to the map
+        This function takes all scanMain data and addes it to the map
         '''
-        #print(scan.posX[-1])
+        #print(scanMain.posX[-1])
         
         #print('\n\nwritemap is being run be mapTask\n')
         
@@ -60,21 +68,21 @@ class mapObj(object):
             '''
             In the event that the following if loop needs to be stopped and memory allocated to other taskes the flag can be changed to 1 thus exiting
             '''
-            self.sensorDataLenght = len(scan.posX)
+            self.sensorDataLenght = len(scanMain.posX)
             if  self.sensorDataLenght != 0:
                 '''
-                Iterates through all of the scan data until it has all been addaed to the map
+                Iterates through all of the scanMain data until it has all been addaed to the map
                 '''
-                self.posX = scan.posX[-1] 
-                scan.posX.pop()
-                self.posY = scan.posY[-1]
-                scan.posY.pop()
-                self.headingPlusServoAngle = scan.headingPlusServoAngle[-1] #global angle
-                scan.headingPlusServoAngle.pop()
-                self.distance = scan.distance[-1] #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
-                scan.distance.pop()
-                #self.distanceRight = scan.distanceRight[-1]
-                #scan.distanceRight.pop()
+                self.posX = scanMain.posX[-1] 
+                scanMain.posX.pop()
+                self.posY = scanMain.posY[-1]
+                scanMain.posY.pop()
+                self.headingPlusServoAngle = scanMain.headingPlusServoAngle[-1] #global angle
+                scanMain.headingPlusServoAngle.pop()
+                self.distance = scanMain.distance[-1] #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
+                scanMain.distance.pop()
+                #self.distanceRight = scanMain.distanceRight[-1]
+                #scanMain.distanceRight.pop()
                 
                 
                 self.dataX = self.posX + self.distance*math.cos(self.headingPlusServoAngle)
@@ -84,9 +92,9 @@ class mapObj(object):
                 
                 self.newDataPt = [self.dataX,self.dataY]
                 #print('new point',self.newDataPt)
-                self.newDataPtStep = [(self.dataX/resolution),(self.dataY/resolution)]
+                self.newDataPtStep = [(self.dataX/self.resolution),(self.dataY/self.resolution)]
                 #print('point in steps',self.newDataPtStep)
-                self.newDataPtStep = [round(self.dataX/resolution),round(self.dataY/resolution)]
+                self.newDataPtStep = [round(self.dataX/self.resolution),round(self.dataY/self.resolution)]
                 #print('point in steps rounded',self.newDataPtStep)
                 
                 #check that x is not greater than difference between map edge and current position 
@@ -97,19 +105,19 @@ class mapObj(object):
                 self.numberColumnRight = self.arrayWidth/2
                 
                 if self.newDataPtStep[1] > self.numberRowAboveOrgin: #ensures point within 'Northern' bound
-                    print('\n(writeMap Warning) Scan point Out of map range Y upper!!!!!!!!!!!!!!!!!!!!!!!')
+                    print('\n(writeMap Warning) scanMain point Out of map range Y upper!!!!!!!!!!!!!!!!!!!!!!!')
                     print('point in steps',self.newDataPtStep)
                     print('numberRowAboveOrgin',self.numberRowAboveOrgin)
                 elif self.newDataPtStep[1] < -self.numberRowBlowOrgin:  #ensures point within 'Southern' bound
-                    print('\n(writeMap Warning) Scan point Out of map range Y lower!!!!!!!!!!!!!!!!!!!!!!!')
+                    print('\n(writeMap Warning) scanMain point Out of map range Y lower!!!!!!!!!!!!!!!!!!!!!!!')
                     print('point in steps',self.newDataPtStep)
                     print('numberRowBelowOrgin',self.numberRowBlowOrgin)
                 elif self.newDataPtStep[0] > self.numberColumnRight: #ensures point within 'Eastern' bound
-                    print('\n(writeMap Warning) Scan point Out of map range X upper!!!!!!!!!!!!!!!!!!!!!!!')
+                    print('\n(writeMap Warning) scanMain point Out of map range X upper!!!!!!!!!!!!!!!!!!!!!!!')
                     print('point in steps',self.newDataPtStep)
                     print('numberColumnRight',self.numberColumnRight)
                 elif self.newDataPtStep[0] < -self.numberColumnLeft: #ensures point within 'Western' bound
-                    print('\n(writeMap Warning) Scan point Out of map range X lower!!!!!!!!!!!!!!!!!!!!!!!')
+                    print('\n(writeMap Warning) scanMain point Out of map range X lower!!!!!!!!!!!!!!!!!!!!!!!')
                     print('point in steps',self.newDataPtStep)
                     print('numberColumnLeft',self.numberColumnLeft)
                 else:
@@ -126,11 +134,11 @@ class mapObj(object):
         #print('writemap Success\n')
         return 
     
-    def readPoint (self,x,y):
+    def readPointXY(self,x,y):
         '''
         Reads a specified coordinate
         '''
-        self.newDataRead = [round(x/resolution),round(y/resolution)]
+        self.newDataRead = [round(x/self.resolution),round(y/self.resolution)]
         #print('Print',x,',',y)
         
         if self.newDataRead[1] > self.numberRowAboveOrgin: #ensures point within 'Northern' bound
@@ -161,14 +169,17 @@ class mapObj(object):
             
         return value
         
-    def printMap(self): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
+    def printMap(self,dictionary): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
         '''
         Prints the Map in the best readable formate I have found so far without 3rd party modules
         '''
         print('\n********************Printing map*********************\n')
-        print('Map width:',self.arrayWidth*resolution,'m Map Length:', self.arrayLength*resolution,'m Resolution', resolution,'m\n')
+        print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
+        print('Map width:',round(self.arrayWidth*self.resolution*3.28,1),'ft Map Length:', round(self.arrayLength*self.resolution*3.28,1),'ft Resolution', round(self.resolution*3.28,4),'ft\n')
         print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
-        print('Extremes in meters:\n(',-self.numberColumnLeft*resolution,self.numberRowAboveOrgin*resolution,') (',self.numberColumnRight*resolution,self.numberRowAboveOrgin*resolution,') (',self.numberColumnRight*resolution,-self.numberRowBlowOrgin*resolution,') (',-self.numberColumnLeft*resolution,-self.numberRowBlowOrgin*resolution,')\n')
+        print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
+        print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
+        
         self.iterateCol = 0
         self.iterateRow = 0
         exitFlag = 0
@@ -176,7 +187,10 @@ class mapObj(object):
             '''
             Iterates through each bit printing only the bit with no spaces. 
             '''
-            print(self.map[self.iterateRow*self.arrayLength+self.iterateCol], end="")#printing a single bit
+            if self.arrayElements - (dictionary['positionX']*-1+self.arrayWidth/2 + 1 + (dictionary['positionY']+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
+                print('*', end="")
+            else:
+                print(self.map[self.iterateRow*self.arrayLength+self.iterateCol], end="")#printing a single bit
             self.iterateCol +=1
             
             if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:#If map complete we exit
@@ -185,43 +199,124 @@ class mapObj(object):
                 self.iterateRow +=1 
                 self.iterateCol = 0
                 print(end="\n")
-
+        print('\n')
         return   
+        
+    def printMapFancy(self,fill,dictionary): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
+        '''
+        Prints the Map in the best readable formate I have found so far without 3rd party modules
+        '''
+        print('\n********************Printing map*********************\n')
+        print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
+        print('Map width:',round(self.arrayWidth*self.resolution*3.28,1),'ft Map Length:', round(self.arrayLength*self.resolution*3.28,1),'ft Resolution', round(self.resolution*3.28,4),'ft\n')
+        print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
+        print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
+        print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
+        
+        
+        if fill == 1:
+            self.fillType = '0'
+            self.emptyType = ' '
+            self.robot = '*'
+        else:
+            self.fillType = ' '
+            self.emptyType = '0'
+            self.robot = '*'
+        
+        print('Legend: Robot - * ,','Object - ',self.emptyType,', Empty Space if applicable - ',self.fillType)
+        self.iterateCol = 0
+        self.iterateRow = 0
+        exitFlag = 0
+        iter = 0
+        while iter < self.arrayWidth:
+            print('*',end="")
+            iter +=1
+        print(end='\n')
+        
+        
+        while exitFlag == 0:
+            '''
+            Iterates through each bit printing only the bit with no spaces. 
+            '''
+            if self.arrayElements - (round(dictionary['positionX']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['positionY']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
+                print(self.robot, end="")
+            elif self.map[self.iterateRow*self.arrayLength+self.iterateCol] == 1:
+                print(self.emptyType, end="")#printing a single bit
+
+            else:
+                print(self.fillType,end="")
+            self.iterateCol +=1
+            
+            if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:#If map complete we exit
+                exitFlag = 1
+            elif self.iterateCol == self.arrayWidth:#otherwise if the end of a row has been reached we move to the next row
+                self.iterateRow +=1 
+                self.iterateCol = 0
+                print(end="*\n")
+                
+        iter = 0
+        print(end='*\n')
+        while iter < self.arrayWidth:
+            print('*',end="")
+            iter +=1
+        print(end='\n')
+        return  
+        
+    def readPoint(self,point):
+        '''
+        reads map based on bitarray coordinates aka element number
+        '''
+        value = self.map[int(point)]
+        return value   
             
 if __name__ == '__main__':        
     #***********Test code**************
     #don't Change or it will messup current validation based on array size
-    mapheight = 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
-    mapWidth =  10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
-    resolution = .5 #meters Even fraction Note: see previous note 
+    mapHeight = 20 # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
+    mapWidth =  20 # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
+    resolution = .302 # .302#Test with .5 #meters Even fraction Note: see previous note 
     
-#Test scan array********************************************************
-    class scan():
-        print('scan Object created')
+#Test scanMain array********************************************************
+    class scanMain():
+        print('scanMain Object created')
+        
+#Dictionary for lookup of location
+    dictionary = {'positionX': 7, 'positionY':5}
+    '''
+    scanMain.posX=array.array('f',[10,10,10,10,10,10,10,10,10,10,10,0,0,0,0,0,0,0,0,0,0,0])
+    scanMain.posY=array.array('f',[9,8,7,6,5,4,3,2,1,0,-1,9,8,7,6,5,4,3,2,1,0,-1])    
+    scanMain.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
+    scanMain.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
+    '''
+
     
-    scan.posX=array.array('f',[1,2,1,5,5.5,-4.5,-5,0,0,0,0,1,0,-1,0,.5,0,-.5,0])
-    scan.posY=array.array('f',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5])    
-    scan.headingPlusServoAngle=array.array('f',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
-    scan.distance=array.array('f',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
+    scanMain.posX=array.array('f',[1,2,1,5,5.5,-4.5,-5,0,0,0,0,1,0,-1,0,.5,0,-.5,0,10,-9.6])
+    scanMain.posY=array.array('f',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5,10,-9.6])    
+    scanMain.headingPlusServoAngle=array.array('f',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
+    scanMain.distance=array.array('f',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
+    
+    
+    
+    
     #create test map
-    testmap = mapObj(mapheight, mapWidth, resolution) 
+    testmap = mapObj(mapHeight, mapWidth, resolution) 
     #Test run mapTask()
-    testmap.mapTask(scan)
+    testmap.mapTask(scanMain)
     #Print Map 
     
-    testmap.printMap()
+    testmap.printMap(dictionary)
     #print('\n\nFinished mapTask look above matrix to see it in action.  I am currently testing the matrix limits \nwith the points at bound of a 10 meter matrix. I will remove prints later and improve comments.')
     print('\n\n')
     
     #Testing readPoint
-    print('Testing readPoint')    
-    a = testmap.readPoint(0,5)
-    print('(0,5) bit:',a,'\n')    
-    a = testmap.readPoint(5,0)
-    print('(5,0) bit:',a,'\n')    
-    a= testmap.readPoint(0,0)
-    print('(0,0) bit:',a,'\n')    
-    a= testmap.readPoint(0,5.5)
-    print('(0,5.5) bit:',a)
     
- 
+    print('Testing readPoint')    
+    a = testmap.readPointXY(0,5)
+    print('(0,5) bit:',a,'\n')    
+    a = testmap.readPointXY(5,0)
+    print('(5,0) bit:',a,'\n')    
+    a= testmap.readPointXY(0,0)
+    print('(0,0) bit:',a,'\n')    
+    a= testmap.readPointXY(0,5.5)
+    print('(0,5.5) bit:',a)
+    testmap.printMapFancy(0,dictionary)

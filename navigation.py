@@ -8,20 +8,8 @@ Navigation
 This task and associated functions are designed to determine a waypoint from current robot position and map 
 '''
 
-
-
 import mapping
 import math
-
-
-
-
-
-
-
-
-
-
 
 class navObj():
     print('navigation Object created')
@@ -48,7 +36,7 @@ class navObj():
     
     
     def mapScan(self,dictionary):
-        print('\nFinding the near by objects....***************************************')
+        print('Finding near by objects....')
         self.currentX = dictionary['positionX']
         self.currentY = dictionary['positionY']
 
@@ -65,89 +53,54 @@ class navObj():
         0000000
         '''
         self.numberBeyondR = (self.numberScans-1)/2
+        #print(self.numberBeyondR)
         self.scanIndex = self.numberBeyondR  #plus one counts center scan or directly beside robot
-        currentScan = -3
+        currentScan = -self.numberBeyondR
         self.mapScanResults = [] 
         iObject = -self.numberBeyondR
-        while currentScan < self.numberScans-3:
-            columnIter = 0
-            while self.numberColumnLeft + currentScan + self.currentX/self.resolution < 0:
-                '''
-                Treats the sides of map like objects
-                '''
-                print("fill in off map")
-                self.mapScanResults.append([-3 +columnIter,3])
-                #self.mapScanResults.append([-3,realitiveY])
-                #self.mapScanResults.append([-3,realitiveY])
-                #self.mapScanResults.append([realitiveX,realitiveY])
-                self.mapScanResults.append([-3+columnIter,0])
-                #self.mapScanResults.append([realitiveX,realitiveY])
-                #self.mapScanResults.append([realitiveX,realitiveY])
-                self.mapScanResults.append([-3+columnIter,-3])
-                currentScan +=1
-                columnIter +=1
-                
+        
+        while currentScan < self.numberScans -self.numberBeyondR:
             '''
+            Scans 7 by 7 area for objects
+
             Searches the north direction by iterating through each element in a column until an object is found in one column
             '''
-            if mapMain.readPoint(self.arrayElements - ((round(self.currentX/self.resolution)+currentScan- self.scanIndex)*-1+self.arrayWidth/2 + 1 + ((round(self.currentY/self.resolution)+iObject)+self.arrayLength/2-1)*self.arrayLength)) == 1:
+            #print('self.numberRowAboveOrgin + self.currentY/self.resolution + iObject',self.numberRowAboveOrgin - self.currentY/self.resolution - iObject)
+            if mapMain.readPoint(self.arrayElements - ((round(self.currentX/self.resolution)+currentScan)*-1+self.arrayWidth/2 + 1 + ((round(self.currentY/self.resolution)+iObject)+self.arrayLength/2-1)*self.arrayLength)) == 1:
                 '''
-                stores the X and Y coordinates of the object and the relative distance sqrt(sum^2)
+                stores the X and Y coordinates of the object
                 '''
-                print('\nFound an Object!!!')
+                #print('\nFound an Object!!!')
                 objX = round(self.currentX/self.resolution)+currentScan- self.scanIndex
                 objY = round(self.currentY/self.resolution)+iObject
-                print('(X,Y): ', objX, objY)
-                realitiveX = currentScan- self.scanIndex
+                #print('(X,Y): ', objX, objY)
+                realitiveX = currentScan
                 realitiveY = iObject
-                print('RealitiveX,RealitiveY: ', realitiveX,realitiveY)
+                #print('RealitiveX,RealitiveY: ', realitiveX,realitiveY)
                 
                 #relativeDistance = math.sqrt((iObject)**2+(currentScan- self.scanIndex)**2)
                 #print('relativedistance: ',relativeDistance)
                 self.mapScanResults.append([realitiveX,realitiveY])#
                 if iObject == self.numberScans: #If the number of rows to be checked is complete we move to next column even when point found
-                    print('End column!!!')
+                    #print('End column!!!')
                     currentScan +=1#next scan
                     iObject = -self.numberBeyondR#reset row
                 else:#Move to next row
                     iObject +=1
+
             elif iObject == self.numberScans:#If the number of rows to be checked is complete we move to next column 
-                print('End column!!!')
+                #print('End column!!!')
                 currentScan +=1#next scan
                 iObject = -self.numberBeyondR
+                
             else:
                 iObject +=1#Move to next row
                 #print('N.O.',end='')
-                
-            #print('self.numberColumnRight - currentScan - self.currentX',self.numberColumnRight - currentScan - self.currentX/self.resolution)
-            #print('self.numberColumnRight',self.numberColumnRight)
-            #print('currentScan',currentScan)
-            if self.numberColumnRight - currentScan - self.currentX/self.resolution < -1:
-                columnIter = 1
-                while  currentScan  < self.numberScans-3:
-                    '''
-                    Treats the sides of map like objects
-                    '''
-                    print('fill in off map column')
-                    self.mapScanResults.append([columnIter,3])
-                    #self.mapScanResults.append([-3,realitiveY])
-                    #self.mapScanResults.append([-3,realitiveY])
-                    #self.mapScanResults.append([realitiveX,realitiveY])
-                    self.mapScanResults.append([columnIter,0])
-                    #self.mapScanResults.append([realitiveX,realitiveY])
-                    #self.mapScanResults.append([realitiveX,realitiveY])
-                    self.mapScanResults.append([columnIter,-3])
-                    currentScan +=1
-                    columnIter +=1   
+                    
                    
                    
                    
-                   
-                   
-                   
-                   
-                   
-        print('\nFinished!!!********************************\n\n')
+        #print('Finished!!!\n\n')
                 
     def setWaypoint(self):
         '''
@@ -156,26 +109,26 @@ class navObj():
         
         Quadrant Examples:
         northQuadrant        northEastQuadrant *considering excluding the 1 directly above and besides robot
-        0011100                 1100000
-        0011100                 1110000
-        0011100                 0111000
-        000*000                 001*000
-        0000000                 0000000
-        0000000                 0000000
-        0000000                 0000000
+        0011100                 1100000  1100000
+        0011100                 1110000  1110000
+        0011100                 0111000  0110000
+        000*000                 001*000  000*000
+        0000000                 0000000  0000000
+        0000000                 0000000  0000000
+        0000000                 0000000  0000000
         
         
         '''
-        print('\nDetermining wayPoint...****************************\n')
+        print('Determining wayPoint...****************************')
         
         northCheckList =        [[-1,3],[0,3],[1,3],[-1,2],[0,2],[1,2],[-1,1],[0,1],[1,1]]
-        northWestCheckList =    [[-3,3],[-2,3],[-3,2],[-2,2],[-1,2],[-2,1],[-1,1],[0,1],[-1,0]]
+        northWestCheckList =    [[-3,3],[-2,3],[-3,2],[-2,2],[-1,2],[-2,1],[-1,1]]#,[0,1],[-1,0]]
         westCheckList =         [[-3,1],[-2,1],[-1,1],[-3,0],[-2,0],[-1,0],[-3,-1],[-2,-1],[-1,-1]]
-        southWestCheckList =    [[-3,-3],[-2,-3],[-3,-2],[-2,-2],[-1,-2],[-2,-1],[-1,-1],[0,-1],[-1,0]]
+        southWestCheckList =    [[-3,-3],[-2,-3],[-3,-2],[-2,-2],[-1,-2],[-2,-1],[-1,-1]]#,[0,-1],[-1,0]]
         southCheckList =        [[-1,-3],[0,-3],[1,-3],[-1,-2],[0,-2],[1,-2],[-1,-1],[0,-1],[1,-1]]
-        southEastCheckList =    [[3,-3],[2,-3],[3,-2],[2,-2],[1,-2],[2,-1],[1,-1],[0,-1],[1,0]]
+        southEastCheckList =    [[3,-3],[2,-3],[3,-2],[2,-2],[1,-2],[2,-1],[1,-1]]#,[0,-1],[1,0]]
         eastCheckList =         [[3,1],[2,1],[1,1],[3,0],[2,0],[1,0],[3,-1],[2,-1],[1,-1]]
-        northEastCheckList =    [[3,3],[2,3],[3,2],[2,2],[1,2],[2,1],[1,1],[0,1],[1,0]]
+        northEastCheckList =    [[3,3],[2,3],[3,2],[2,2],[1,2],[2,1],[1,1]]#,[0,1],[1,0]]
         
         #North Check**************************************
         
@@ -183,8 +136,8 @@ class navObj():
             north = 1
         else:
             north = 0
-        print('check',[i for i in self.mapScanResults if i in northCheckList])
-        print('north: ',north,'\n')
+        #print('check',[i for i in self.mapScanResults if i in northCheckList])
+        print('north:     ',north,'')
         
         #NorthWest Check**************************************
         
@@ -192,8 +145,8 @@ class navObj():
             northWest = 1
         else:
             northWest = 0
-        print('check',[i for i in self.mapScanResults if i in northWestCheckList])
-        print('northWest: ',northWest,'\n')        
+        #print('check',[i for i in self.mapScanResults if i in northWestCheckList])
+        print('northWest: ',northWest,'')        
         
         #West Check**************************************
         
@@ -201,8 +154,8 @@ class navObj():
             west = 1
         else:
             west = 0
-        print('check',[i for i in self.mapScanResults if i in westCheckList])
-        print('west: ',west,'\n')        
+        #print('check',[i for i in self.mapScanResults if i in westCheckList])
+        print('west:      ',west,'')        
         
         #southWest Check**************************************
         
@@ -210,8 +163,8 @@ class navObj():
             southWest = 1
         else:
             southWest = 0
-        print('check',[i for i in self.mapScanResults if i in southWestCheckList])
-        print('southWest: ',southWest,'\n')
+        #print('check',[i for i in self.mapScanResults if i in southWestCheckList])
+        print('southWest: ',southWest,'')
         
         #South Check**************************************
         
@@ -219,8 +172,8 @@ class navObj():
             south = 1
         else:
             south = 0
-        print('check',[i for i in self.mapScanResults if i in southCheckList])
-        print('south: ',south,'\n')
+        #print('check',[i for i in self.mapScanResults if i in southCheckList])
+        print('south:     ',south,'')
         
         #SouthEast Check**************************************
         
@@ -228,8 +181,8 @@ class navObj():
             southEast = 1
         else:
             southEast = 0
-        print('check',[i for i in self.mapScanResults if i in southEastCheckList])
-        print('southEast: ',southEast,'\n')
+        #print('check',[i for i in self.mapScanResults if i in southEastCheckList])
+        print('southEast: ',southEast,'')
         
         #East Check**************************************
         
@@ -237,8 +190,8 @@ class navObj():
             east = 1
         else:
             east = 0
-        print('check',[i for i in self.mapScanResults if i in eastCheckList])
-        print('East: ',east,'\n')
+        #print('check',[i for i in self.mapScanResults if i in eastCheckList])
+        print('East:      ',east,'')
         
         #northEast Check**************************************
         
@@ -246,8 +199,8 @@ class navObj():
             northEast = 1
         else:
             northEast = 0
-        print('check',[i for i in self.mapScanResults if i in northEastCheckList])
-        print('East: ',northEast,'\n')
+        #print('check',[i for i in self.mapScanResults if i in northEastCheckList])
+        print('northEast: ',northEast,'')
         
         
         #****************************************************************************************
@@ -260,7 +213,36 @@ class navObj():
             wayY = self.currentY + 3
             self.waypoint = [wayX,wayY]
             print('Case 0 move north')
+        
+        #Case 5 move west from corner
+        elif north == 1 and northEast == 1 and southEast == 1 and west == 0:
+            wayX = self.currentX - 3
+            wayY = self.currentY 
+            self.waypoint = [wayX,wayY]
+            print('Case 5 move west')
             
+        #Case 6 move south
+        elif west == 1 and northWest == 1 and north == 1 and south == 0:
+            wayX = self.currentX 
+            wayY = self.currentY - 3
+            self.waypoint = [wayX,wayY]
+            print('Case 6 move south')
+        
+        #Case 7 move east from corner
+        elif west == 1 and southWest == 1 and south == 1 and east == 0:
+            wayX = self.currentX + 3
+            wayY = self.currentY 
+            self.waypoint = [wayX,wayY]
+            print('Case 7 move east')
+
+        #Case 8 move north from corner
+        elif south == 1 and southEast == 1 and east == 1 and north == 0:
+            wayX = self.currentX 
+            wayY = self.currentY + 3
+            self.waypoint = [wayX,wayY]
+            print('Case 5 move north')
+
+        
         #Case 1 move north
         elif north == 0 and ( northEast == 1 or east == 1):
             wayX = self.currentX 
@@ -290,6 +272,9 @@ class navObj():
             wayY = self.currentY 
             self.waypoint = [wayX,wayY]
             print('Case 4 move east')
+            
+            
+            
 if __name__ == '__main__':        
     import mapping
     import array
@@ -304,7 +289,7 @@ if __name__ == '__main__':
         print('scan Object created')
             
     #Dictionary for lookup of location
-    dictionary = {'positionX': -9.5, 'positionY':0}  #dictionary = {'positionX': 5, 'positionY':5}  
+    dictionary = {'positionX': 10-resolution*3, 'positionY':-9+resolution*1}  #dictionary = {'positionX': 5, 'positionY':5}  
     scanMain.posX=array.array('f',[10,10,10,10,10,10,10,10,10,10,10,0,0,0,0,0,0,0,0,0,0,0,5,6.5,6.2,3.8,5.9,4.2,5.9,4.2,5.9,4.2,4.2])
     scanMain.posY=array.array('f',[9,8,7,6,5,4,3,2,1,0,-1,9,8,7,6,5,4,3,2,1,0,-1,8,6,5,5,4.2,4.2,3.9,3.9,6.1,6.1,5.8])    
     scanMain.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    

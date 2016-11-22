@@ -46,7 +46,10 @@ class mapObj(object):
         #print('init Success\n')
         
         iterTop = 0
-        while iterTop < self.arrayWidth:#adds a map object boundary
+        while iterTop < self.arrayWidth:
+            '''
+            adds a map object boundary on first and last row so robot does not go off the map
+            '''
             self.map[iterTop] = 1
             
             self.map[self.arrayElements-self.arrayWidth+iterTop] = 1
@@ -55,7 +58,9 @@ class mapObj(object):
         self.numberRows = self.arrayElements/self.arrayWidth
         rowIter = 1
         while rowIter < self.numberRows:
-            
+            '''
+            adds object to first and last column so robot does not go off the map
+            '''
             self.map[rowIter*self.arrayWidth] = 1
             self.map[rowIter*self.arrayWidth +self.arrayWidth-1] = 1
             rowIter +=1
@@ -93,6 +98,8 @@ class mapObj(object):
                 '''
                 Iterates through all of the scanMain data until it has all been addaed to the map
                 '''
+                
+                #popping the last data set
                 self.posX = scanMain.posX[-1] 
                 scanMain.posX.pop()
                 self.posY = scanMain.posY[-1]
@@ -101,10 +108,8 @@ class mapObj(object):
                 scanMain.headingPlusServoAngle.pop()
                 self.distance = scanMain.distance[-1] #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
                 scanMain.distance.pop()
-                #self.distanceRight = scanMain.distanceRight[-1]
-                #scanMain.distanceRight.pop()
-                
-                
+    
+                #Anylsising data and creating data point 
                 self.dataX = self.posX + self.distance*math.cos(self.headingPlusServoAngle)
                 self.dataX = float(format(self.dataX, '.4f')) #**********This tries to eliminate as many duplicate enteries as possible by rounding******
                 self.dataY = self.posY + self.distance*math.sin(self.headingPlusServoAngle)
@@ -125,6 +130,9 @@ class mapObj(object):
                 self.numberColumnRight = self.arrayWidth/2
                 
                 if self.newDataPtStep[1] > self.numberRowAboveOrgin: #ensures point within 'Northern' bound
+                    '''
+                    Each of these condition prevents error due to points that are off the map
+                    '''
                     print('\n(writeMap Warning) scanMain point Out of map range Y upper!!!!!!!!!!!!!!!!!!!!!!!')
                     print('point in steps',self.newDataPtStep)
                     print('numberRowAboveOrgin',self.numberRowAboveOrgin)
@@ -141,11 +149,11 @@ class mapObj(object):
                     print('point in steps',self.newDataPtStep)
                     print('numberColumnLeft',self.numberColumnLeft)
                 else:
+                    '''
+                    If the point is on the map it is added to map
+                    '''
                     self.map[self.middleElement-1+self.newDataPtStep[0]-self.newDataPtStep[1]*self.arrayWidth]=1
-                
-                
-                
-                
+
                 #print('\n')
                 #print(self.map)
             else:
@@ -165,6 +173,9 @@ class mapObj(object):
         #print('Print',x,',',y)
         
         if self.newDataRead[1] > self.numberRowAboveOrgin: #ensures point within 'Northern' bound
+            '''
+            Each of these condition prevents error due to points that are off the map
+            '''
             #print('self.newDataRead',self.newDataRead)
             #print('self.numberRowAboveOrgin',self.numberRowAboveOrgin)            
             print('\n(readPoint Warning) readPoint Out of map range Y upper, assume wall!!!!!!!!!!!!!')
@@ -187,6 +198,9 @@ class mapObj(object):
             print('numberColumnLeft',self.numberColumnLeft,'\n')
             value = 1
         else:
+            '''
+            If the point is on the map it is set to value and returned
+            '''
             value = self.map[self.middleElement-1+self.newDataRead[0]-self.newDataRead[1]*self.arrayWidth] #-1 because count from 0 no du 
             #print('Bit: ',value)
             
@@ -211,21 +225,30 @@ class mapObj(object):
             Iterates through each bit printing only the bit with no spaces. 
             '''
             if self.arrayElements - (dictionary['positionX']*-1+self.arrayWidth/2 + 1 + (dictionary['positionY']+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
+                '''
+                If the Robot is the current data point then it prints the robot character '*'
+                '''
                 print('*', end="")
             else:
                 print(self.map[self.iterateRow*self.arrayLength+self.iterateCol], end="")#printing a single bit
             self.iterateCol +=1
             
-            if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:#If map complete we exit
+            if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:
+                '''
+                If map complete we exit
+                '''
                 exitFlag = 1
-            elif self.iterateCol == self.arrayWidth:#otherwise if the end of a row has been reached we move to the next row
+            elif self.iterateCol == self.arrayWidth:
+                '''
+                otherwise if the end of a row has been reached we move to the next row
+                '''
                 self.iterateRow +=1 
                 self.iterateCol = 0
                 print(end="\n")
         print('\n')
         return   
         
-    def printMapFancy(self,fill,dictionary): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
+    def printMapFancy(self,dictionary,fill=0): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
         '''
         Prints the Map in the best readable formate I have found so far without 3rd party modules
         '''
@@ -238,6 +261,9 @@ class mapObj(object):
         
         
         if fill == 1:
+            '''
+            Based on the input the fill type is selected
+            '''
             self.fillType = '0'
             self.emptyType = ' '
             self.robot = '*'
@@ -252,6 +278,9 @@ class mapObj(object):
         exitFlag = 0
         iter = 0
         while iter < self.arrayWidth:
+            '''
+            Prints map boarder
+            '''
             print('*',end="")
             iter +=1
         print(end='\n')
@@ -295,12 +324,15 @@ class mapObj(object):
             value = 1
        
         return value   
-            
+ 
+#********************************************************************************************************************************************************************************
+#                                                Test code
+#********************************************************************************************************************************************************************************
+
 if __name__ == '__main__':        
-    #***********Test code**************
     #don't Change or it will messup current validation based on array size
-    mapHeight = 20 # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
-    mapWidth =  20 # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
+    mapHeight = 40 # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
+    mapWidth =  40 # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
     resolution = .302 # .302#Test with .5 #meters Even fraction Note: see previous note 
     
 #Test scanMain array********************************************************
@@ -332,8 +364,6 @@ if __name__ == '__main__':
     #Print Map 
     
     testmap.printMap(dictionary)
-    #print('\n\nFinished mapTask look above matrix to see it in action.  I am currently testing the matrix limits \nwith the points at bound of a 10 meter matrix. I will remove prints later and improve comments.')
-    print('\n\n')
     
     #Testing readPoint
     
@@ -346,4 +376,5 @@ if __name__ == '__main__':
     print('(0,0) bit:',a,'\n')    
     a= testmap.readPointXY(0,5.5)
     print('(0,5.5) bit:',a)
-    testmap.printMapFancy(0,dictionary)
+    #fancy Map test type = 0
+    testmap.printMapFancy(dictionary,0)

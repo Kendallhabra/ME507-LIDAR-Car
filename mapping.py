@@ -1,6 +1,7 @@
 #Zachary Arnott
 #******************file*****************
 
+
 import array
 import math
 
@@ -43,6 +44,25 @@ class mapObj(object):
         self.obsXCoord = array.array('d')
         self.obsYCoord = array.array('d')
         #print('init Success\n')
+        
+        iterTop = 0
+        while iterTop < self.arrayWidth:#adds a map object boundary
+            self.map[iterTop] = 1
+            
+            self.map[self.arrayElements-self.arrayWidth+iterTop] = 1
+            iterTop +=1
+            
+        self.numberRows = self.arrayElements/self.arrayWidth
+        rowIter = 1
+        while rowIter < self.numberRows:
+            
+            self.map[rowIter*self.arrayWidth] = 1
+            self.map[rowIter*self.arrayWidth +self.arrayWidth-1] = 1
+            rowIter +=1
+        
+        
+        
+        
         return
 
     def mapTask (self,scanMain):
@@ -122,6 +142,9 @@ class mapObj(object):
                     print('numberColumnLeft',self.numberColumnLeft)
                 else:
                     self.map[self.middleElement-1+self.newDataPtStep[0]-self.newDataPtStep[1]*self.arrayWidth]=1
+                
+                
+                
                 
                 #print('\n')
                 #print(self.map)
@@ -266,7 +289,11 @@ class mapObj(object):
         '''
         reads map based on bitarray coordinates aka element number
         '''
-        value = self.map[int(point)]
+        try:
+            value = self.map[int(point)]
+        except IndexError:
+            value = 1
+       
         return value   
             
 if __name__ == '__main__':        

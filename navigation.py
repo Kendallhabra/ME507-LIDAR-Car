@@ -15,6 +15,9 @@ class navObj():
     print('navigation Object created')
     
     def __init__(self,mapHeight, mapWidth, resolution):
+        '''
+        On startup navigation initalizes for the map size
+        '''
         self.mapHeight = mapHeight
         self.mapWidth = mapWidth
         self.resolution = resolution
@@ -31,17 +34,20 @@ class navObj():
         self.numberColumnRight = self.arrayWidth/2
         
     def navTask(self,dictionary):
-        print('nav task')
-    
+        '''
+        Map task scans map and determines the waypoint to be set.
+        '''
+        self.mapScan(dictionary)
+        self.setWaypoint()
     
     
     def mapScan(self,dictionary):
+        '''
+        Looks up the surrounding points in the map and determines which ones have objects.
+        '''
         print('Finding near by objects....')
         self.currentX = dictionary['positionX']
         self.currentY = dictionary['positionY']
-
-        
-        #search near car*****************************************************************
        
         self.numberScans = 7 #If 7x7=> 21 element search around car. Assume odd so that the number in front and behind robot checked are equal in length
         '''Current nav map, with Robot:*   ***I don't plan on changing for now as far as size is conserned***
@@ -95,11 +101,7 @@ class navObj():
                 
             else:
                 iObject +=1#Move to next row
-                #print('N.O.',end='')
-                    
-                   
-                   
-                   
+                #print('N.O.',end='')         
         #print('Finished!!!\n\n')
                 
     def setWaypoint(self):
@@ -108,7 +110,7 @@ class navObj():
         If an object is found that variable is set to 1. (aka north = 1)
         
         Quadrant Examples:
-        northQuadrant        northEastQuadrant *considering excluding the 1 directly above and besides robot
+        northQuadrant        northEastQuadrant *considering excluding the 1 directly above and besides robot (change was made refer to second NE example)
         0011100                 1100000  1100000
         0011100                 1110000  1110000
         0011100                 0111000  0110000
@@ -116,10 +118,8 @@ class navObj():
         0000000                 0000000  0000000
         0000000                 0000000  0000000
         0000000                 0000000  0000000
-        
-        
         '''
-        print('Determining wayPoint...****************************')
+        print('Determining wayPoint...')
         
         northCheckList =        [[-1,3],[0,3],[1,3],[-1,2],[0,2],[1,2],[-1,1],[0,1],[1,1]]
         northWestCheckList =    [[-3,3],[-2,3],[-3,2],[-2,2],[-1,2],[-2,1],[-1,1]]#,[0,1],[-1,0]]
@@ -129,6 +129,10 @@ class navObj():
         southEastCheckList =    [[3,-3],[2,-3],[3,-2],[2,-2],[1,-2],[2,-1],[1,-1]]#,[0,-1],[1,0]]
         eastCheckList =         [[3,1],[2,1],[1,1],[3,0],[2,0],[1,0],[3,-1],[2,-1],[1,-1]]
         northEastCheckList =    [[3,3],[2,3],[3,2],[2,2],[1,2],[2,1],[1,1]]#,[0,1],[1,0]]
+        
+        #*************************************************************************************************************
+        #                     Coss Checking lists to determine which zones are flagged
+        #*************************************************************************************************************
         
         #North Check**************************************
         
@@ -204,7 +208,7 @@ class navObj():
         
         
         #****************************************************************************************
-        #Conditions
+        #                             Waypoint Conditions
         #****************************************************************************************
         
         #Case 0 move north
@@ -241,16 +245,13 @@ class navObj():
             wayY = self.currentY + 3
             self.waypoint = [wayX,wayY]
             print('Case 5 move north')
-
         
         #Case 1 move north
         elif north == 0 and ( northEast == 1 or east == 1):
             wayX = self.currentX 
             wayY = self.currentY + 3
             self.waypoint = [wayX,wayY]
-            print('Case 1 move north')
-        
-        
+            print('Case 1 move north')        
         
         #Case 2 move west
         elif west == 0 and ( northWest == 1 or north == 1):
@@ -272,16 +273,21 @@ class navObj():
             wayY = self.currentY 
             self.waypoint = [wayX,wayY]
             print('Case 4 move east')
-            
-            
-            
-if __name__ == '__main__':        
+         
+         
+#********************************************************************************************************************************************************************************
+#                                                Test code
+#********************************************************************************************************************************************************************************
+if __name__ == '__main__':  
+    '''
+    Runs only if this file is main
+    '''
     import mapping
     import array
-    #***********Test code*********************************************************************************************************************************************************************
+    
     #don't Change or it will messup current validation based on array size
-    mapHeight = 20 # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
-    mapWidth =  20 # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
+    mapHeight = 40 # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
+    mapWidth =  40 # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
     resolution = .302 # .302#Test with .5 #meters Even fraction Note: see previous note 
         
     #Test scan array********************************************************
@@ -289,16 +295,12 @@ if __name__ == '__main__':
         print('scan Object created')
             
     #Dictionary for lookup of location
-    dictionary = {'positionX': 10-resolution*3, 'positionY':-9+resolution*1}  #dictionary = {'positionX': 5, 'positionY':5}  
+    dictionary = {'positionX': 32*resolution, 'positionY':resolution*32}  #dictionary = {'positionX': 5, 'positionY':5}  
     scanMain.posX=array.array('f',[10,10,10,10,10,10,10,10,10,10,10,0,0,0,0,0,0,0,0,0,0,0,5,6.5,6.2,3.8,5.9,4.2,5.9,4.2,5.9,4.2,4.2])
     scanMain.posY=array.array('f',[9,8,7,6,5,4,3,2,1,0,-1,9,8,7,6,5,4,3,2,1,0,-1,8,6,5,5,4.2,4.2,3.9,3.9,6.1,6.1,5.8])    
     scanMain.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
     scanMain.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
 
-
-
-        
-        
         
     #create test map
     mapMain = mapping.mapObj(mapHeight, mapWidth, resolution) 
@@ -306,16 +308,13 @@ if __name__ == '__main__':
     mapMain.mapTask(scanMain)
     #Print Map 
         
-    #mapMain.printMap(dictionary)
-    #print('\n\nFinished mapTask look above matrix to see it in action.  I am currently testing the matrix limits \nwith the points at bound of a 10 meter matrix. I will remove prints later and improve comments.')
-    print('\n\n')
-    mapMain.printMapFancy(1,dictionary)   
+    mapMain.printMapFancy(dictionary,1)   
     
     navMain = navObj(mapHeight, mapWidth, resolution)
     
     
-    navMain.mapScan(dictionary)
-    navMain.setWaypoint()
+    #navMain.mapScan(dictionary)
+    #navMain.setWaypoint()
     
-    
+    navMain.navTask(dictionary)
     

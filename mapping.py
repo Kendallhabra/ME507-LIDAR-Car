@@ -64,10 +64,7 @@ class mapObj(object):
             self.map[rowIter*self.arrayWidth] = 1
             self.map[rowIter*self.arrayWidth +self.arrayWidth-1] = 1
             rowIter +=1
-        
-        
-        
-        
+
         return
 
     def mapTask (self,scanMain):
@@ -248,16 +245,17 @@ class mapObj(object):
         print('\n')
         return   
         
-    def printMapFancy(self,dictionary,fill=0): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
+    def printMapFancy(self,dictionary,fill=0,legend=1): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
         '''
         Prints the Map in the best readable formate I have found so far without 3rd party modules
         '''
-        print('\n********************Printing map*********************\n')
-        print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
-        print('Map width:',round(self.arrayWidth*self.resolution*3.28,1),'ft Map Length:', round(self.arrayLength*self.resolution*3.28,1),'ft Resolution', round(self.resolution*3.28,4),'ft\n')
-        print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
-        print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
-        print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
+        if legend == 1:
+            print('\n********************Printing map*********************\n')
+            print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
+            print('Map width:',round(self.arrayWidth*self.resolution*3.28,1),'ft Map Length:', round(self.arrayLength*self.resolution*3.28,1),'ft Resolution', round(self.resolution*3.28,4),'ft\n')
+            print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
+            print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
+            print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
         
         
         if fill == 1:
@@ -358,23 +356,23 @@ if __name__ == '__main__':
     
     
     #create test map
-    testmap = mapObj(mapHeight, mapWidth, resolution) 
+    mapMain = mapObj(mapHeight, mapWidth, resolution) 
     #Test run mapTask()
-    testmap.mapTask(scanMain)
+    mapMain.mapTask(scanMain)
     #Print Map 
     
-    testmap.printMap(dictionary)
+    mapMain.printMap(dictionary)
     
     #Testing readPoint
     
     print('Testing readPoint')    
-    a = testmap.readPointXY(0,5)
+    a = mapMain.readPointXY(0,5)
     print('(0,5) bit:',a,'\n')    
-    a = testmap.readPointXY(5,0)
+    a = mapMain.readPointXY(5,0)
     print('(5,0) bit:',a,'\n')    
-    a= testmap.readPointXY(0,0)
+    a= mapMain.readPointXY(0,0)
     print('(0,0) bit:',a,'\n')    
-    a= testmap.readPointXY(0,5.5)
+    a= mapMain.readPointXY(0,5.5)
     print('(0,5.5) bit:',a)
     #fancy Map test type = 0
-    testmap.printMapFancy(dictionary,0)
+    mapMain.printMapFancy(dictionary,0)

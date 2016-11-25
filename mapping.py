@@ -1,11 +1,8 @@
 #Zachary Arnott
 #******************file*****************
 
-
 import array
 import math
-
-
 
 class mapObj(object):
     '''
@@ -81,9 +78,6 @@ class mapObj(object):
         '''
         This function takes all scanMain data and addes it to the map
         '''
-        #print(scanMain.posX[-1])
-        
-        #print('\n\nwritemap is being run be mapTask\n')
         
         self.exitFlag = 0
         while self.exitFlag == 0:
@@ -150,16 +144,8 @@ class mapObj(object):
                     If the point is on the map it is added to map
                     '''
                     self.map[self.middleElement-1+self.newDataPtStep[0]-self.newDataPtStep[1]*self.arrayWidth]=1
-
-                #print('\n')
-                #print(self.map)
             else:
                 self.exitFlag = 1
-                #print(self.map)
-                
-                #print('finished loop')
-        
-        #print('writemap Success\n')
         return 
     
     def readPointXY(self,x,y):
@@ -167,14 +153,11 @@ class mapObj(object):
         Reads a specified coordinate
         '''
         self.newDataRead = [round(x/self.resolution),round(y/self.resolution)]
-        #print('Print',x,',',y)
         
         if self.newDataRead[1] > self.numberRowAboveOrgin: #ensures point within 'Northern' bound
             '''
             Each of these condition prevents error due to points that are off the map
-            '''
-            #print('self.newDataRead',self.newDataRead)
-            #print('self.numberRowAboveOrgin',self.numberRowAboveOrgin)            
+            '''           
             print('\n(readPoint Warning) readPoint Out of map range Y upper, assume wall!!!!!!!!!!!!!')
             print('Point in steps',self.newDataRead)
             print('numberRowAboveOrgin',self.numberRowAboveOrgin,'\n')
@@ -256,8 +239,7 @@ class mapObj(object):
             print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
             print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
             print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
-        
-        
+
         if fill == 1:
             '''
             Based on the input the fill type is selected
@@ -269,8 +251,8 @@ class mapObj(object):
             self.fillType = ' '
             self.emptyType = '0'
             self.robot = '*'
-        
-        print('Legend: Robot - * ,','Object - ',self.emptyType,', Empty Space if applicable - ',self.fillType)
+        if legend == 1:
+            print('Legend: Robot - * ,','Object - ',self.emptyType,', Empty Space if applicable - ',self.fillType)
         self.iterateCol = 0
         self.iterateRow = 0
         exitFlag = 0
@@ -282,7 +264,6 @@ class mapObj(object):
             print('*',end="")
             iter +=1
         print(end='\n')
-        
         
         while exitFlag == 0:
             '''
@@ -329,9 +310,9 @@ class mapObj(object):
 
 if __name__ == '__main__':        
     #don't Change or it will messup current validation based on array size
-    mapHeight = 40 # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
-    mapWidth =  40 # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
-    resolution = .302 # .302#Test with .5 #meters Even fraction Note: see previous note 
+    mapHeight = 30       # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
+    mapWidth =  30       # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
+    resolution = .302*.5 # .302#Test with .5 #meters Even fraction Note: see previous note 
     
 #Test scanMain array********************************************************
     class scanMain():
@@ -339,22 +320,19 @@ if __name__ == '__main__':
         
 #Dictionary for lookup of location
     dictionary = {'positionX': 7, 'positionY':5}
-    '''
+    
+    ''' use if you need to check orgin location
     scanMain.posX=array.array('f',[10,10,10,10,10,10,10,10,10,10,10,0,0,0,0,0,0,0,0,0,0,0])
     scanMain.posY=array.array('f',[9,8,7,6,5,4,3,2,1,0,-1,9,8,7,6,5,4,3,2,1,0,-1])    
     scanMain.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
     scanMain.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
     '''
-
     
     scanMain.posX=array.array('f',[1,2,1,5,5.5,-4.5,-5,0,0,0,0,1,0,-1,0,.5,0,-.5,0,10,-9.6])
     scanMain.posY=array.array('f',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5,10,-9.6])    
     scanMain.headingPlusServoAngle=array.array('f',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
     scanMain.distance=array.array('f',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
-    
-    
-    
-    
+
     #create test map
     mapMain = mapObj(mapHeight, mapWidth, resolution) 
     #Test run mapTask()
@@ -363,8 +341,7 @@ if __name__ == '__main__':
     
     mapMain.printMap(dictionary)
     
-    #Testing readPoint
-    
+    #Testing readPoint    
     print('Testing readPoint')    
     a = mapMain.readPointXY(0,5)
     print('(0,5) bit:',a,'\n')    

@@ -12,7 +12,7 @@ import mapping
 import math
 
 class navObj():
-    print('navigation Object created')
+    print('Navigation Object created')
     
     def __init__(self,mapHeight, mapWidth, resolution):
         '''
@@ -35,6 +35,32 @@ class navObj():
         
         self.explorerFlag = 0 #This initailises the explorer part of waypoint logic
         
+        '''
+        Here I initialzes all of the checks and past robot position so that navigation knows when to update waypoint.
+        The waypoint will only be updated if the checks change or the robot reaches the next quadrant(aka move one resolution distance).
+        '''
+        
+        #initializing navigation history
+        self.wayPointSteps = [0,0] #keeps record of location of current waypoint set point.
+        self.lastPosition = ['null'] #Assume we start in the middle of the map [0,0]
+        
+        self.north = -1
+        self.northWest = -1
+        self.west = -1
+        self.southWest = -1
+        self.south = -1
+        self.east = -1
+        self.northEast = -1
+        self.northClose = -1
+        self.westClose = -1
+        self.southClose = -1
+        self.eastClose = -1
+        self.explorerNorth = -1
+        self.explorerWest = -1
+        self.explorerSouth = -1
+        self.explorerEast = -1
+        self.nothingHappened = 0 #ensure the robot does not stop if new waypoint is not set for some reason. It ensure logic runs on next cycle
+        
     def navTask(self,dictionary):
         '''
         Map task scans map and determines the wayPointSteps to be set.
@@ -42,16 +68,15 @@ class navObj():
         self.mapScan(dictionary)
         self.setwayPointSteps()
     
-    
     def mapScan(self,dictionary):
         '''
         Looks up the surrounding points in the map and determines which ones have objects.
         '''
-        print('\nFinding near by objects....')
+        #print('\nFinding near by objects....')
         self.currentX = round(dictionary['positionX']/self.resolution)
         self.currentY = round(dictionary['positionY']/self.resolution)
        
-        self.numberScans = 7 #If 7x7=> 21 element search around car. Assume odd so that the number in front and behind robot checked are equal in length
+        self.numberScans = 7 #If 7x7=> 21 element search around robot. Assume odd so that the number in front and behind robot checked are equal in length
         '''Current nav map, with Robot:*   ***I don't plan on changing for now as far as size is conserned***
         0000000 
         0000000
@@ -122,387 +147,510 @@ class navObj():
         
                            Example
         X X X    NW N NW   T F F
-        
-        X * X    W  *  E   T * F
-        
+        X * X    W  *  E   T * F        
         X X X    SW S SE   T T T 
-        
-        
         '''
-        print('Determining wayPointSteps...')
-        
-        #Here are the checklist of points in each quadrant
-        
+        #print('Determining wayPointSteps...')
+        #*************Here are the checklist of points in each quadrant******************************************************************************
         northCheckList =        [[-1,3],[0,3],[1,3],[-1,2],[0,2],[1,2],[-1,1],[0,1],[1,1]]
         westCheckList =         [[-3,1],[-2,1],[-1,1],[-3,0],[-2,0],[-1,0],[-3,-1],[-2,-1],[-1,-1]]
         southCheckList =        [[-1,-3],[0,-3],[1,-3],[-1,-2],[0,-2],[1,-2],[-1,-1],[0,-1],[1,-1]]
         eastCheckList =         [[3,1],[2,1],[1,1],[3,0],[2,0],[1,0],[3,-1],[2,-1],[1,-1]]
+        
+        explorerNorthCheckList =        [[-1,3],[0,3],[1,3],[-1,2],[0,2],[1,2],[-1,1],[0,1],[1,1] ,          [2,0],[2,1],[2,1]]        #,[-2,0],[-2,1],[-2,2]
+        explorerWestCheckList =         [[-3,1],[-2,1],[-1,1],[-3,0],[-2,0],[-1,0],[-3,-1],[-2,-1],[-1,-1] , [0,2],[-1,2],[-2,2]]    #,[0,-2],[-1,-2],[-2,-2]
+        explorerSouthCheckList =        [[-1,-3],[0,-3],[1,-3],[-1,-2],[0,-2],[1,-2],[-1,-1],[0,-1],[1,-1] , [-2,0],[-2,-1],[-2,-2]]    #,[2,0],[2,-1],[2,-2]
+        explorerEastCheckList =         [[3,1],[2,1],[1,1],[3,0],[2,0],[1,0],[3,-1],[2,-1],[1,-1] ,          [0,-2],[1,-2],[2,-2]]        #[0,2],[1,2],[2,2],
         
         northWestCheckList =    [[-3,3],[-2,3],[-3,2],[-2,2],[-1,2],[-2,1],[-1,1]]#,[0,1],[-1,0]]
         southWestCheckList =    [[-3,-3],[-2,-3],[-3,-2],[-2,-2],[-1,-2],[-2,-1],[-1,-1]]#,[0,-1],[-1,0]]
         southEastCheckList =    [[3,-3],[2,-3],[3,-2],[2,-2],[1,-2],[2,-1],[1,-1]]#,[0,-1],[1,0]]
         northEastCheckList =    [[3,3],[2,3],[3,2],[2,2],[1,2],[2,1],[1,1]]#,[0,1],[1,0]]
         
-        #These check if the robot is directly by the wall and logic tries to move car to be atleast 1 element way from wall
+        #These check if the robot is directly by the wall and logic tries to move robot to be atleast 1 element way from wall
         northCloseCheck =       [[0,1]]     #[[-1,1],[0,1],[1,1]]
         westCloseCheck =        [[-1,0]]    #[[-1,-1],[-1,0],[-1,1]]
         southCloseCheck =       [[0,-1]]    #[[-1,-1],[0,-1],[1,-1]]
         eastCloseCheck =        [[1,0]]     #[[1,-1],[1,0],[1,1]]
-        
-        
         #*************************************************************************************************************
         #                     Coss Checking lists to determine which zones are flagged
         #*************************************************************************************************************
         
         #North Check**************************************
-        
         if [i for i in northCheckList if i in self.mapScanResults] != []:
             '''
             Checks of checklist item is in the mapmapScanResults if nothing found then it is set to false
             '''
-            north = 1
+            self.north = 1
         else:
-            north = 0
+            self.north = 0
         #print('check',[i for i in self.mapScanResults if i in northCheckList])
-        print('north:     ',north,'')
+        print('north:     ',self.north,'')
         
         #NorthWest Check**************************************
-        
         if [i for i in self.mapScanResults if i in northWestCheckList] != []:
-            northWest = 1
+            self.northWest = 1
         else:
-            northWest = 0
+            self.northWest = 0
         #print('check',[i for i in self.mapScanResults if i in northWestCheckList])
-        print('northWest: ',northWest,'')        
+        print('northWest: ',self.northWest,'')        
         
         #West Check**************************************
-        
         if [i for i in westCheckList if i in self.mapScanResults] != []:
-            west = 1
+            self.west = 1
         else:
-            west = 0
+            self.west = 0
         #print('check',[i for i in self.mapScanResults if i in westCheckList])
-        print('west:      ',west,'')        
+        print('west:      ',self.west,'')        
         
         #southWest Check**************************************
-        
         if [i for i in southWestCheckList if i in self.mapScanResults] != []:
-            southWest = 1
+            self.southWest = 1
         else:
-            southWest = 0
+            self.southWest = 0
         #print('check',[i for i in self.mapScanResults if i in southWestCheckList])
-        print('southWest: ',southWest,'')
+        print('southWest: ',self.southWest,'')
         
         #South Check**************************************
-        
         if [i for i in southCheckList if i in self.mapScanResults] != []:
-            south = 1
+            self.south = 1
         else:
-            south = 0
+            self.south = 0
         #print('check',[i for i in self.mapScanResults if i in southCheckList])
-        print('south:     ',south,'')
+        print('south:     ',self.south,'')
         
-        #SouthEast Check**************************************
-        
+        #SouthEast Check************************************** 
         if [i for i in southEastCheckList if i in self.mapScanResults] != []:
-            southEast = 1
+            self.southEast = 1
         else:
-            southEast = 0
+            self.southEast = 0
         #print('check',[i for i in self.mapScanResults if i in southEastCheckList])
-        print('southEast: ',southEast,'')
+        print('southEast: ',self.southEast,'')
         
         #East Check**************************************
-        
         if [i for i in eastCheckList if i in self.mapScanResults] != []:
-            east = 1
+            self.east = 1
         else:
-            east = 0
+            self.east = 0
         #print('check',[i for i in self.mapScanResults if i in eastCheckList])
-        print('East:      ',east,'')
+        print('East:      ',self.east,'')
         
         #northEast Check**************************************
-        
         if [i for i in northEastCheckList if i in self.mapScanResults] != []:
-            northEast = 1
+            self.northEast = 1
         else:
-            northEast = 0
+            self.northEast = 0
         #print('check',[i for i in self.mapScanResults if i in northEastCheckList])
-        print('northEast: ',northEast,'')
+        print('northEast: ',self.northEast,'')
         
         
         #north Close Check**************************************
-        
         if [i for i in northCloseCheck if i in self.mapScanResults] != []:
-            northClose = 1
+            self.northClose = 1
         else:
-            northClose = 0
+            self.northClose = 0
         #print('check',[i for i in self.mapScanResults if i in northEastCheckList])
-        print('northClose:',northClose,'')
+        print('northClose:',self.northClose,'')
         
         #west Close Check**************************************
-        
         if [i for i in westCloseCheck if i in self.mapScanResults] != []:
-            westClose = 1
+            self.westClose = 1
         else:
-            westClose = 0
+            self.westClose = 0
         #print('check',[i for i in self.mapScanResults if i in northEastCheckList])
-        print('westClose: ',westClose,'')
+        print('westClose: ',self.westClose,'')
         
         #south Close Check**************************************
         
         if [i for i in southCloseCheck if i in self.mapScanResults] != []:
-            southClose = 1
+            self.southClose = 1
         else:
-            southClose = 0
+            self.southClose = 0
         #print('check',[i for i in self.mapScanResults if i in northEastCheckList])
-        print('southClose:',southClose,'')
-        
+        print('southClose:',self.southClose,'')
+
         #east Close Check**************************************
-        
         if [i for i in eastCloseCheck if i in self.mapScanResults] != []:
-            eastClose = 1
+            self.eastClose = 1
         else:
-            eastClose = 0
+            self.eastClose = 0
         #print('check',[i for i in self.mapScanResults if i in northEastCheckList])
-        print('eastClose: ',eastClose,'')
+        print('eastClose: ',self.eastClose,'')
         
+        #Explorer checks
         
+        #ExplorerNorth*****************************************
+        if [i for i in explorerNorthCheckList if i in self.mapScanResults] != []:
+            self.explorerNorth = 1
+        else:
+            self.explorerNorth = 0
+        #print('check',[i for i in self.mapScanResults if i in explorerNorthCheckList])
+        print('explorerNorth: ',self.explorerNorth,'')
+        
+        #ExplorerWest*****************************************
+        if [i for i in explorerWestCheckList if i in self.mapScanResults] != []:
+            self.explorerWest = 1
+        else:
+            self.explorerWest = 0
+        #print('check',[i for i in self.mapScanResults if i in explorerWestCheckList])
+        print('explorerWest: ',self.explorerWest,'')
+        
+        #ExplorerSouth*****************************************
+        if [i for i in explorerSouthCheckList if i in self.mapScanResults] != []:
+            self.explorerSouth = 1
+        else:
+            self.explorerSouth = 0
+        #print('check',[i for i in self.mapScanResults if i in explorerSouthCheckList])
+        print('explorerSouth: ',self.explorerSouth,'')
+        
+        #ExplorerEast*****************************************
+        if [i for i in explorerEastCheckList if i in self.mapScanResults] != []:
+            self.explorerEast = 1
+        else:
+            self.explorerEast = 0
+        #print('check',[i for i in self.mapScanResults if i in explorerEastCheckList])
+        print('explorerEast: ',self.explorerEast,'')
         #****************************************************************************************
         #                             wayPointSteps Conditions
         #****************************************************************************************
-        
-        
-        
-        
         #This can be customised depending on how often explore needs to be triggered
-        explorerEvents = 0 #Turns on cycle based expoler
+        explorerEvents = 1 #Turns on cycle based expoler
         stopExplorer = 1 #Turns on cycle based exit expoler if you do not want expoler to exit on its own
         if explorerEvents == 1:
             ''' This event/cycle based control of explorer. It may not be needed.
             '''
             try:
-                self.expolerCounter +=1
-                print('self.expolerCounter +=1',self.expolerCounter)
+                self.explorerCounter +=1
+                #print('self.explorerCounter +=1',self.explorerCounter)
             except AttributeError:
-                self.expolerCounter = 0
+                self.explorerCounter = 0
                 #self.explorerFlag = 0 in init
         
-            if self.expolerCounter == 7:#number of counts till explorer is triggered
-                self.explorerFlag = 1
-            elif self.expolerCounter == 10 and stopExplorer == 1:#number of steps till expolered turned off
-                 self.explorerFlag = 0
-                 self.expolerCounter = 0
-        
+        if self.explorerCounter == -1:#number of counts till explorer is triggered -1 mean we dont want it triggered ensure that you put a limiter on it if you dont want it running till the next object is found
+                self.explorerFlag = 1    
         
         #*************************
-        self.wayPointdistance = 2 # a number between 1 and 3 insure its in the scanned region
+        self.wayPointdistance = 1 # a number between 1 and 3 insure its in the scanned region
         #*************************
-        
-        
 
-        #currently explore is inactive its goal is to prevent the orbiting of a chair or table
-        if self.explorerFlag == 1:
-            print('EXPLORE')
+        if (self.lastPosition != [self.currentX,self.currentY] or self.lastNorth != self.north or self.lastNorthWest != self.northWest or self.lastWest != self.west or self.lastSouthWest != self.southWest or self.lastSouth != self.south or self.lastEast != self.east or self.lastNorthEast != self.northEast or self.lastNorthClose != self.northClose 
+            or self.lastWestClose != self.westClose or self.lastSouthClose != self.southClose or self.lastEastClose != self.eastClose or self.lastExplorerNorth != self.explorerNorth or self.lastExplorerWest != self.explorerWest or self.lastExplorerSouth != self.explorerSouth or self.lastExplorerEast != self.explorerEast or (self.twoStepsBack == 2
+            and self.lastDirection == 4) or (self.twoStepsBack == 4 and self.lastDirection == 2) or (self.twoStepsBack == 1 and self.lastDirection == 3) or (self.twoStepsBack == 3 and self.lastDirection == 1) or self.nothingHappened == 1):
             '''
-            The explore cases conitnue in the same direction as the last movement so long as it is clear to do so. If it is not clear explore is turned off.
+            This if statment prevents the waypoint from being updated unless one of the logics has changed or the robot position has change by one quadrant this ensures logic work the same way as it did in simulation. 
+            The logics of switching directings was included because when switching logics from normal to expoler the robot may not have moved and the logic may not have changed. This because as a last resort of the 
+            robot does not move under normal logics the robot switchs to explore which will get the robot moving again.
             '''
             
-            #Case 12 move north last move north
-            if north == 0 and self.lastDirection == 1 : #lastDirection arrugment (1,2,3,4) => (N,W,S,E) 
+            #currently explore is inactive its goal is to prevent the orbiting of a chair or table
+            
+            #******************************************************************************************
+            #                           Explorer
+            #***************************************************************************************
+            if self.explorerFlag == 1 or self.nothingHappened == 1:
+                print('running explorer')
                 '''
-                Only to current direction is checked to be clear. Then waypoint is set.
+                The explore cases conitnue in the same direction as the last movement so long as it is clear to do so. If it is not clear explore is turned off.
                 '''
-                wayX = self.currentX 
-                wayY = self.currentY + self.wayPointdistance
-                self.wayPointSteps = [wayX,wayY]
-                print('Case 12 move north')
                 
-            #Case 13 move west last move west
-            elif west == 0 and self.lastDirection == 2 :
-                wayX = self.currentX - self.wayPointdistance
-                wayY = self.currentY 
-                self.wayPointSteps = [wayX,wayY]
-                print('Case 13 move west')
+                #Case 12 move north last move north
+                if self.north == 0 and self.lastDirection == 1 : #lastDirection arrugment (1,2,3,4) => (N,W,S,E) 
+                    '''
+                    Only to current direction is checked to be clear. Then waypoint is set.
+                    '''
+                    wayX = self.currentX
+                    if self.explorerNorth == 0:
+                        wayX = wayX + 1
+                    wayY = self.currentY + self.wayPointdistance
+                    self.wayPointSteps = [wayX,wayY]
+                    print('Case 12 move north')
+                    
+                #Case 13 move west last move west
+                elif self.west == 0 and self.lastDirection == 2 :
+                    wayX = self.currentX - self.wayPointdistance
+                    wayY = self.currentY
+                    if self.explorerWest == 0:
+                        wayY = wayY + 1
+                    self.wayPointSteps = [wayX,wayY]
+                    print('Case 13 move west')
+                    
+                #Case 14 move north last move north
+                elif self.south == 0 and self.lastDirection == 3 :
+                    wayX = self.currentX 
+                    if self.explorerSouth == 0:
+                        wayX = wayX - 1
+                    wayY = self.currentY - self.wayPointdistance
+                    self.wayPointSteps = [wayX,wayY]
+                    print('Case 14 move south')
                 
-            #Case 14 move north last move north
-            elif south == 0 and self.lastDirection == 3 :
-                wayX = self.currentX 
-                wayY = self.currentY - self.wayPointdistance
-                self.wayPointSteps = [wayX,wayY]
-                print('Case 14 move south')
-            
-            #Case 15 move east last move east
-            elif east == 0 and self.lastDirection == 4 :
-                wayX = self.currentX + self.wayPointdistance
-                wayY = self.currentY 
-                self.wayPointSteps = [wayX,wayY]
-                print('Case 15 move east')
-            else: #Turns off explore if no move possible in same direction and the normal cases are tried
-                self.explorerFlag = 0
-                self.expolerCounter = 0
-                print('EXIT EXPLORE!')
-            
-                
-        elif self.explorerFlag == 0: #*********************************************************************************************************************************************
-            '''
-            These are the standard logic arguments for waypoint setting.
-            '''
-            #Case 0 move north
-            twoStepsBack = self.lastDirection #lastDirection arrugment (1,2,3,4) => (N,W,S,E) 
-            if north == 0 and northWest == 0 and west == 0 and southWest == 0 and south == 0 and southEast == 0 and east == 0 and northEast == 0:
-                ''' W
-                   FFF
-                   F*F
-                   FFF'''
-                wayX = self.currentX 
-                wayY = self.currentY + self.wayPointdistance
-                self.wayPointSteps = [wayX,wayY]
-                self.lastDirection = 1 #lastDirection arrugment (1,2,3,4) => (N,W,S,E) 
-                print('Case 0 move north')
-            
-            #Case 5 move west from corner
-            elif north == 1 and northEast == 1 and southEast == 1 and west == 0: #may be better to change north to north west, but its not broken of mi no going to fix it.
-                ''' 
-                     TT
-                   WF* 
-                      T'''
-                wayX = self.currentX - self.wayPointdistance
-                wayY = self.currentY 
-                if northClose ==  1:
-                    wayY = self.currentY -1
-                    print('close')
-                self.wayPointSteps = [wayX,wayY]
-                self.lastDirection = 2
-                print('Case 5 move west')
-                
-            #Case 6 move south from corner
-            elif west == 1 and northWest == 1 and north == 1 and south == 0:
-                wayX = self.currentX 
-                wayY = self.currentY - self.wayPointdistance
-                if westClose == 1:
-                    wayX = self.currentX + 1
-                    print('close')
-                self.wayPointSteps = [wayX,wayY]
-                self.lastDirection = 3
-                print('Case 6 move south')
-            
-            #Case 7 move east from corner
-            elif west == 1 and southWest == 1 and south == 1 and east == 0:
-                wayX = self.currentX + self.wayPointdistance
-                wayY = self.currentY 
-                self.wayPointSteps = [wayX,wayY]
-                self.lastDirection = 4
-                if southClose == 1:
-                    wayY = self.currentY + 1
-                    print('close')
-                print('Case 7 move east')
-
-            #Case 8 move north from corner
-            elif south == 1 and southEast == 1 and east == 1 and north == 0:
-                wayX = self.currentX 
-                wayY = self.currentY + self.wayPointdistance
-                if eastClose == 1:
-                    wayX = self.currentX - 1
-                    print('close')
-                self.wayPointSteps = [wayX,wayY]
-                self.lastDirection = 1
-                print('Case 8 move north')
-            
-            #Case 1 move north
-            elif north == 0 and ( northEast == 1 or east == 1 )and west == 0: #and northWest ==0 and southWest == 0
-                ''' W
-                    FT
-                   F*T
-                   '''
-                wayX = self.currentX 
-                wayY = self.currentY + self.wayPointdistance
-                if eastClose == 1:
-                    wayX = self.currentX - 1
-                    print('close')
-                self.wayPointSteps = [wayX,wayY]
-                self.lastDirection = 1
-                print('Case 1 move north')        
-            
-            #Case 2 move west
-            elif west == 0 and ( northWest == 1 or north == 1 )and south ==  0 : #and southEast == 0 and southWest ==0 #or northEast == 1
-                wayX = self.currentX - self.wayPointdistance
-                wayY = self.currentY 
-                if northClose ==  1:
-                    wayY = self.currentY -1
-                    print('close')
-                self.wayPointSteps = [wayX,wayY]
-                self.lastDirection = 2
-                print('Case 4 move west')
-                
-            #Case 3 move south
-            elif south == 0 and ( southWest == 1 or west == 1 ) and east == 0 : #and northEast == 0 and southEast == 0#or northWest == 1
-                wayX = self.currentX 
-                wayY = self.currentY - self.wayPointdistance
-                if westClose == 1:
-                    wayX = self.currentX + 1
-                    print('close')
-                self.wayPointSteps = [wayX,wayY]
-                self.lastDirection = 3
-                print('Case 3 move south')
-            
-            #case 4 move east
-            elif east == 0 and ( southEast == 1 or south == 1 ) and north == 0 : #and northEast == 0 and northWest == 0#or southWest == 1
-                wayX = self.currentX + self.wayPointdistance
-                wayY = self.currentY 
-                if southClose == 1:
-                    wayY = self.currentY + 1
-                    print('close')
-                self.wayPointSteps = [wayX,wayY]
-                self.lastDirection = 4
-                print('Case 4 move east')
-            
-            if (twoStepsBack == 2 and self.lastDirection == 4) or (twoStepsBack == 4 and self.lastDirection == 2) or (twoStepsBack == 1 and self.lastDirection == 3) or (twoStepsBack == 3 and self.lastDirection == 1):
-                self.explorerFlag = 1
-                print('last move backtrack=> explorer')
-            
-            
-            #************************
-            #These case work based on the previous direction of travel. To deal with doors and so on.
-            #************************
-            #case 9 north/south door*****************
-            elif (west == 1 ) and (east == 1 ): #or southWest == 1 or northWest == 1  #or southEast == 1 or northEast == 1
-                '''  W
-                    T*T
-                      '''
-                if self.lastDirection == 1:
+                #Case 15 move east last move east
+                elif self.east == 0 and self.lastDirection == 4 :
+                    wayX = self.currentX + self.wayPointdistance
+                    wayY = self.currentY 
+                    if self.explorerEast == 0:
+                        wayY = wayY - 1
+                    self.wayPointSteps = [wayX,wayY]
+                    print('Case 15 move east')
+                    
+                #case 16 move north*************************************************************************************************
+                elif self.north == 0:
                     wayX = self.currentX 
                     wayY = self.currentY + self.wayPointdistance
                     self.wayPointSteps = [wayX,wayY]
-                    print('Case 9 move north')
-                    
-                else:
-                    self.lastDirection = 3
+                    self.lastDirection = 1
+                    print('Case 16 move north')
+                
+                #case 17 move south
+                elif self.south == 0:
                     wayX = self.currentX 
                     wayY = self.currentY - self.wayPointdistance
                     self.wayPointSteps = [wayX,wayY]
-                    print('Case 9 move south')
-            
-            
-            #case 10 east/west door*****************
-            elif (north == 1 ) and (south == 1):#or northWest ==1 or northEast == 1 # or southEast == 1 or southWest == 1 #added lastDirection arrugment 1,2,3,4 (N,W,S,E) then remove door stuff replace by last direction
-                '''  T
-                     *W
-                     T'''
-                if self.lastDirection == 4:
+                    self.lastDirection = 3
+                    print('Case 17 move south')
+                    
+                #case 18 move west
+                elif self.west == 0:
+                    wayX = self.currentX - self.wayPointdistance
+                    wayY = self.currentY 
+                    self.lastDirection = 2
+                    self.wayPointSteps = [wayX,wayY]
+                    print('Case 18 move west')
+                    
+                #case 19 move east
+                elif self.east == 0:
+                    wayX = self.currentX + self.wayPointdistance
+                    wayY = self.currentY 
+                    self.lastDirection = 4
+                    self.wayPointSteps = [wayX,wayY]
+                    print('Case 19 move east')
+                    
+                else: #Turns off explore if no move possible in same direction and the normal cases are tried
+                    self.explorerFlag = 0
+                    self.explorerCounter = 0
+                #**********turn of explorer control*******************    
+                if (self.explorerCounter == 4 and stopExplorer == 1) :#or (self.explorerCounter == 22) #number of steps till expolered turned off
+                    '''
+                    If the explorer counter is on it stops it and changes to normal logic
+                    '''
+                    self.explorerFlag = 0
+                    self.explorerCounter = 0
+                    if self.lastDirection == 1:
+                        self.lastDirection = 5 #provides 0Case info about last explorer direction (1,2,3,4) => (N,W,S,E) => (5,6,7,8)
+                    elif self.lastDirection == 2:
+                        self.lastDirection = 6
+                    elif self.lastDirection == 3:
+                        self.lastDirection = 7
+                    elif self.lastDirection == 4:
+                        self.lastDirection = 8
+                    #print('EXIT EXPLORE!')
+                self.nothingHappened = 0
+                
+            #***************************************************************************************************************   
+            #                                       Normal Logic
+            #***************************************************************************************************************
+            elif self.explorerFlag == 0 or self.nothingHappened == 1: 
+                self.nothingHappened = 0
+                '''
+                These are the standard logic arguments for waypoint setting.
+                '''
+                self.twoStepsBack = self.lastDirection #lastDirection arrugment (1,2,3,4) => (N,W,S,E) 
+                #twoStepsback lets me draw a comparison if direction between the previous to steps to prevent getting stuck in a forward back infinate loop
+                print('running normal')
+                #Case 0 after explorer
+                if self.north == 0 and self.northWest == 0 and self.west == 0 and self.southWest == 0 and self.south == 0 and self.southEast == 0 and self.east == 0 and self.northEast == 0:
+                    ''' W
+                       FFF
+                       F*F
+                       FFF'''
+                    if self.lastDirection == 5:    #(1,2,3,4) => (N,W,S,E) => (5,6,7,8)
+                        wayX = self.currentX + self.wayPointdistance
+                        wayY = self.currentY - self.wayPointdistance
+                        print('Case 0 after Explorer move southEast')
+                    elif self.lastDirection == 6:
+                        wayX = self.currentX + self.wayPointdistance
+                        wayY = self.currentY + self.wayPointdistance
+                        print('Case 0 after Explorer move northEast')
+                    elif self.lastDirection == 7:
+                        wayX = self.currentX - self.wayPointdistance
+                        wayY = self.currentY + self.wayPointdistance
+                        print('Case 0 after Explorer move northWest')
+                    elif self.lastDirection == 8: 
+                        wayX = self.currentX - self.wayPointdistance
+                        wayY = self.currentY - self.wayPointdistance
+                        print('Case 0 after Explorer move southWest')
+                    else:                                               #if explorer was not the last logic move north
+                        wayX = self.currentX 
+                        wayY = self.currentY + self.wayPointdistance
+                        print('Case 0 move north')
+                    self.wayPointSteps = [wayX,wayY]
+                    self.lastDirection = 1 #lastDirection arrugment (1,2,3,4) => (N,W,S,E) 
+
+                #Case 5 move west from corner
+                elif self.north == 1 and self.northEast == 1 and self.southEast == 1 and self.west == 0: #may be better to change north to north west, but its not broken of mi no going to fix it.
+                    ''' 
+                         TT
+                       WF* 
+                          T'''
+                    wayX = self.currentX - self.wayPointdistance
+                    wayY = self.currentY 
+                    if self.northClose ==  1:
+                        wayY = self.currentY -1
+                        #print('close')
+                    self.wayPointSteps = [wayX,wayY]
+                    self.lastDirection = 2
+                    print('Case 5 move west')
+                    
+                #Case 6 move south from corner
+                elif self.west == 1 and self.northWest == 1 and self.north == 1 and self.south == 0:
+                    wayX = self.currentX 
+                    wayY = self.currentY - self.wayPointdistance
+                    if self.westClose == 1:
+                        wayX = self.currentX + 1
+                        #print('close')
+                    self.wayPointSteps = [wayX,wayY]
+                    self.lastDirection = 3
+                    print('Case 6 move south')
+                
+                #Case 7 move east from corner
+                elif self.west == 1 and self.southWest == 1 and self.south == 1 and self.east == 0:
                     wayX = self.currentX + self.wayPointdistance
                     wayY = self.currentY 
                     self.wayPointSteps = [wayX,wayY]
-                    print('Case 10 move east')
-                    
-                else:
-                    self.lastDirection = 2
+                    self.lastDirection = 4
+                    if self.southClose == 1:
+                        wayY = self.currentY + 1
+                        #print('close')
+                    print('Case 7 move east')
+
+                #Case 8 move north from corner
+                elif self.south == 1 and self.southEast == 1 and self.east == 1 and self.north == 0:
+                    wayX = self.currentX 
+                    wayY = self.currentY + self.wayPointdistance
+                    if self.eastClose == 1:
+                        wayX = self.currentX - 1
+                        #print('close')
+                    self.wayPointSteps = [wayX,wayY]
+                    self.lastDirection = 1
+                    print('Case 8 move north')
+                
+                #Case 1 move north
+                elif self.north == 0 and ( self.northEast == 1 or self.east == 1 )and self.west == 0: 
+                    ''' W
+                        FT
+                       F*T
+                       '''
+                    wayX = self.currentX 
+                    wayY = self.currentY + self.wayPointdistance
+                    if self.eastClose == 1:
+                        wayX = self.currentX - 1
+                        #print('close')
+                    self.wayPointSteps = [wayX,wayY]
+                    self.lastDirection = 1
+                    print('Case 1 move north')        
+                
+                #Case 2 move west
+                elif self.west == 0 and ( self.northWest == 1 or self.north == 1 )and self.south ==  0 : 
                     wayX = self.currentX - self.wayPointdistance
                     wayY = self.currentY 
+                    if self.northClose ==  1:
+                        wayY = self.currentY -1
+                        #print('close')
                     self.wayPointSteps = [wayX,wayY]
-                    print('Case 10 move west')
+                    self.lastDirection = 2
+                    print('Case 4 move west')
+                    
+                #Case 3 move south
+                elif self.south == 0 and ( self.southWest == 1 or self.west == 1 ) and self.east == 0 : 
+                    wayX = self.currentX 
+                    wayY = self.currentY - self.wayPointdistance
+                    if self.westClose == 1:
+                        wayX = self.currentX + 1
+                        #print('close')
+                    self.wayPointSteps = [wayX,wayY]
+                    self.lastDirection = 3
+                    print('Case 3 move south')
                 
+                #case 4 move east
+                elif self.east == 0 and ( self.southEast == 1 or self.south == 1 ) and self.north == 0 : 
+                    wayX = self.currentX + self.wayPointdistance
+                    wayY = self.currentY 
+                    if self.southClose == 1:
+                        wayY = self.currentY + 1
+                        #print('close')
+                    self.wayPointSteps = [wayX,wayY]
+                    self.lastDirection = 4
+                    print('Case 4 move east')
                 
+                if (self.twoStepsBack == 2 and self.lastDirection == 4) or (self.twoStepsBack == 4 and self.lastDirection == 2) or (self.twoStepsBack == 1 and self.lastDirection == 3) or (self.twoStepsBack == 3 and self.lastDirection == 1):
+                    self.explorerFlag = 1
+                    self.explorerCounter = 0
+                    #print('last move backtrack=> explorer')
+                #************************
+                #These case work based on the previous direction of travel. To deal with doors and so on.
+                #************************
+                #case 9 north/south door*****************
+                elif (self.west == 1 ) and (self.east == 1 ): 
+                    '''  W
+                        T*T
+                          '''
+                    if self.lastDirection == 1 and self.north ==0:
+                        wayX = self.currentX 
+                        wayY = self.currentY + self.wayPointdistance
+                        self.wayPointSteps = [wayX,wayY]
+                        print('Case 9 move north')
                         
+                    elif self.south == 0:
+                        self.lastDirection = 3
+                        wayX = self.currentX 
+                        wayY = self.currentY - self.wayPointdistance
+                        self.wayPointSteps = [wayX,wayY]
+                        print('Case 9 move south')
+                
+                #case 10 east/west door*****************
+                elif (self.north == 1 ) and (self.south == 1):#added lastDirection arrugment 1,2,3,4 (N,W,S,E) 
+                    '''  T
+                         *W
+                         T'''
+                    if self.lastDirection == 4 and self.east ==0:
+                        wayX = self.currentX + self.wayPointdistance
+                        wayY = self.currentY 
+                        self.wayPointSteps = [wayX,wayY]
+                        print('Case 10 move east')
+                        
+                    elif self.west ==0:
+                        self.lastDirection = 2
+                        wayX = self.currentX - self.wayPointdistance
+                        wayY = self.currentY 
+                        self.wayPointSteps = [wayX,wayY]
+                        print('Case 10 move west') 
+                  
+            else:
+                explorerFlag = 1
+                explorerCounter = 0
+                self.nothingHappened = 1
+                print('nothing happened normal')
+        else:
+         self.nothingHappened = 1
+         print('nothing happened updatewaypoint')
+            
+        #Robot navigation History        
+        self.lastPosition = [self.currentX,self.currentY]
+        self.lastNorth = self.north 
+        self.lastNorthWest= self.northWest 
+        self.lastWest = self.west 
+        self.lastSouthWest = self.southWest 
+        self.lastSouth = self.south 
+        self.lastEast = self.east
+        self.lastNorthEast = self.northEast
+        self.lastNorthClose = self.northClose
+        self.lastWestClose = self.westClose 
+        self.lastSouthClose = self.southClose 
+        self.lastEastClose = self.eastClose
+        self.lastExplorerNorth = self.explorerNorth
+        self.lastExplorerWest = self.explorerWest 
+        self.lastExplorerSouth = self.explorerSouth 
+        self.lastExplorerEast = self.explorerEast 
+        
         self.wayPoint = [self.wayPointSteps[0]*self.resolution,self.wayPointSteps[1]*self.resolution] #converts waypoint in map steps to meters
          
 #********************************************************************************************************************************************************************************
@@ -516,78 +664,52 @@ if __name__ == '__main__':
     import array
     
     #don't Change or it will messup current validation based on array size
-    mapHeight = 10 # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
-    mapWidth =  10 # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
-    resolution = .305 # .302#Test with .5 #meters Even fraction Note: see previous note 
+    mapHeight = 5        #30      #5        # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
+    mapWidth =  5        #30      #5        # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
+    resolution = .305*.5 #.305*.5 # .305*.5 #.302#Test with .5 #meters Even fraction Note: see previous note 
         
     #Test scan array********************************************************
     class scanMain():
         print('scan Object created')
-            
-    #Dictionary for lookup of location
-    dictionary = {'positionX': 14*resolution, 'positionY':resolution*-8}  #dictionary = {'positionX': 5, 'positionY':5}  
-    #scanMain.posX=array.array('f',[10,10,10,10,10,10,10,10,10,10,10,0,0,0,0,0,0,0,0,0,0,0,5,6.5,6.2,3.8,5.9,4.2,5.9,4.2,5.9,4.2,4.2,0,1])
-    #scanMain.posY=array.array('f',[9,8,7,6,5,4,3,2,1,0,-1,9,8,7,6,5,4,3,2,1,0,-1,8,6,5,5,4.2,4.2,3.9,3.9,6.1,6.1,5.8,0,1])    
-    #scanMain.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
-    #scanMain.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
-    
-    scanMain.posX=array.array('f',[x*resolution for x in [6,7,10,10,10,10,0,1]])
-    scanMain.posY=array.array('f',[x*resolution for x in [3,3,10,11,12,10,0,1]])    
-    scanMain.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
-    scanMain.distance=array.array('f',[0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
-    
-    
-        
-    #create test map
-    mapMain = mapping.mapObj(mapHeight, mapWidth, resolution) 
-    #Test run mapTask()
-    mapMain.mapTask(scanMain)
-    #Print Map 
-        
-    mapMain.printMapFancy(dictionary,1)   
-    
-    navMain = navObj(mapHeight, mapWidth, resolution)
-    
-    
-    #navMain.mapScan(dictionary)
-    #navMain.setwayPointSteps()
-    
-    
-    navMain.navTask(dictionary)
-    print('\nRobot location')
-    print('[',navMain.currentX,',',navMain.currentY,']','(steps)')
-    print('[',dictionary['positionX'],dictionary['positionY'],']')
-    print('Waypoint')
-    print(navMain.wayPointSteps,'(steps)')
-    print(navMain.wayPoint,'(meters)')
-    
-    
-    
+
     #*************************************************************************************************
     #  Test navigation assumes Robot only makes it 2 feet from its current waypoint before its updated
     #*************************************************************************************************
-    
-    #**************
-    #Set Prompt height to 3000!!!!!!!!
-    #**************
-    
+    #******************************************************************
+    #Set Prompt height to 9999 when printing maps 123-146 maps!!!!!!!!
+    #******************************************************************
     
     
-    crazy = 0 # did to set promp height to atleast 5000???
+    crazy = 1 # did to set promp height to atleast 5000???
     
     if crazy == 1: 
+        '''
+        Only cray people would print a 66x66 character map to screen 123 times 
+        '''
+        mapHeight = 10        # 10#30      #5        # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
+        mapWidth =  10        #10 #30      #5        # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
+        resolution = .302*.5  #.305*.5     #.305*.5 # .305*.5 #.302#Test with .5 #meters Even fraction Note: see previous note 
         
-        scanMain.posX=array.array('f',[x*resolution for x in [6,7,10,10,10,10,0,1,12,-10, -10,-11,-12,-10,-10,11,12,13,5]])
-        scanMain.posY=array.array('f',[y*resolution for y in [3,3,10,11,12,10,0,1,0,0,-6,-6,-6,-9,-11,-9,-9,-9,-3]])    
-        scanMain.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
-        scanMain.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
+        X =31*resolution  #31*resolution#14*resolution
+        Y =resolution*-12 #resolution*-12 #resolution*-7
+        
+        dictionary = {'positionX': X, 'positionY':Y} 
+        
+        scanMain.posX=array.array('f',[x*resolution for x in [6,7,10,10,10,10,0,1,12,-10, -10,-11,-12,-10,-10,11,12,13,5,0,0,-10,32,22,30,20,28,26,24,18,16,14,12,10,28,31,26,29,28,0,0,-2,-4,-12,-12,-14,-14,-30,-28,-26,-24,-24,-24,-24,-30,-28,-26,-24,-24,-24,-24,9,7,3,3,10,10,10,9,15,16,17,18,0,-2,-3,-2,0,10,12,14,16]])
+        scanMain.posY=array.array('f',[y*resolution for y in [3,3,10,11,12,10,0,1,0,0,-6,-6,-6,-9,-11,-9,-9,-9,-3,-8,-7,3,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-5,-3,10,12,14,16,18,-3,31,29,31,31,29,31,29,0,0,0,0,2,4,6,-6,-6,-6,-6,-8,-10,-12,1,-3,-3,2,9,7,5,4,30,30,30,30,-30,-29,-27,-25,-24,-31,-29,-27,-25]])    
+        scanMain.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
+        scanMain.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
+        mapMain = mapping.mapObj(mapHeight, mapWidth, resolution)
+        navMain = navObj(mapHeight, mapWidth, resolution)
+        print('scan width 0000000',round(7*resolution,2),'m',round(7*resolution*3.28,2),'ft') 
+         
         mapMain.writemap(scanMain)
         counter = 0
         
-        while counter < 100:
-            print('\nIteration', counter, '***************************************************')
-            mapMain.printMapFancy(dictionary,1,0)
+        while counter < 500: #146#123 at 9999
+            #print('\nIteration', counter, '***************************************************')
             navMain.navTask(dictionary)
+            mapMain.printMapFancy(dictionary,0,0)
             dictionary = {'positionX': navMain.wayPoint[0], 'positionY':navMain.wayPoint[1]}
             counter +=1
-        
+        print('finished!!!!!!!!!!!!!!!!!!!!!!!')

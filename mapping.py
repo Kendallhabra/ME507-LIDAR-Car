@@ -70,11 +70,11 @@ class mapObj(object):
         '''
         #print('mapTask')
         #self.printMap()
-        self.writemap(scanMain)
+        self.writeMap(scanMain)
         return
 
     
-    def writemap(self,scanMain):
+    def writeMap(self,scanMain):
         '''
         This function takes all scanMain data and addes it to the map
         '''
@@ -314,11 +314,11 @@ if __name__ == '__main__':
     mapWidth =  30       # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
     resolution = .302*.5 # .302#Test with .5 #meters Even fraction Note: see previous note 
     
-#Test scanMain array********************************************************
+    #Test scanMain array********************************************************
     class scanMain():
         print('scanMain Object created')
         
-#Dictionary for lookup of location
+    #Dictionary for lookup of location
     dictionary = {'positionX': 7, 'positionY':5}
     
     ''' use if you need to check orgin location
@@ -353,3 +353,8 @@ if __name__ == '__main__':
     print('(0,5.5) bit:',a)
     #fancy Map test type = 0
     mapMain.printMapFancy(dictionary,0)
+    
+    import sys
+    print('mapMain',sys.getsizeof(mapMain))
+    print('mapMain.map',sys.getsizeof(mapMain.map))
+    print('mapMain.writeMap',sys.getsizeof(mapMain.writeMap))

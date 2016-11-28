@@ -727,7 +727,7 @@ if __name__ == '__main__':
         nothingHappenedCounter = 0
         navMain.wayPointdistance = 1
         
-        numberOfIterations = 146   #146#123 at 9999
+        numberOfIterations = 1   #146#123 at 9999
         
         while counter < numberOfIterations: 
             ##print('\nIteration', counter, '***************************************************')
@@ -757,5 +757,49 @@ if __name__ == '__main__':
         
         print('#ofnothingHappens',nothingHappenedCounter,'in ', numberOfIterations, 'iterations')
         #Results 2 in 1000 steps so very small probability of this problem.
+        
+        
+        
+        
+        #Testing memory Usage******************************************************************************************************************************************************
+        
+        import sys
+        
+        print('\nMemory Test******************************************')
+        print('navMain',sys.getsizeof(navMain))
+        print('navMain.setWayPoint',sys.getsizeof(navMain.setWayPoint))
+        print('navMain.scanMap',sys.getsizeof(navMain.scanMap))
+        print('scanMain',sys.getsizeof(scanMain))
+        print('scanMain.posX',sys.getsizeof(scanMain.posX))
+        
+        
+        northCheckList =        [[-1,3],[0,3],[1,3],[-1,2],[0,2],[1,2],[-1,1],[0,1],[1,1]]
+        westCheckList =         [[-3,1],[-2,1],[-1,1],[-3,0],[-2,0],[-1,0],[-3,-1],[-2,-1],[-1,-1]]
+        southCheckList =        [[-1,-3],[0,-3],[1,-3],[-1,-2],[0,-2],[1,-2],[-1,-1],[0,-1],[1,-1]]
+        eastCheckList =         [[3,1],[2,1],[1,1],[3,0],[2,0],[1,0],[3,-1],[2,-1],[1,-1]]
+        
+        explorerNorthCheckList =        [          [2,0],[2,1],[2,1]]        #,[-2,0],[-2,1],[-2,2]
+        explorerWestCheckList =         [        [0,2],[-1,2],[-2,2]]        #,[0,-2],[-1,-2],[-2,-2]
+        explorerSouthCheckList =        [     [-2,0],[-2,-1],[-2,-2]]        #,[2,0],[2,-1],[2,-2]
+        explorerEastCheckList =         [       [0,-2],[1,-2],[2,-2]]        #[0,2],[1,2],[2,2],
+        
+        northWestCheckList =    [[-3,3],[-2,3],[-3,2],[-2,2],[-1,2],[-2,1],[-1,1]]#,[0,1],[-1,0]]
+        southWestCheckList =    [[-3,-3],[-2,-3],[-3,-2],[-2,-2],[-1,-2],[-2,-1],[-1,-1]]#,[0,-1],[-1,0]]
+        southEastCheckList =    [[3,-3],[2,-3],[3,-2],[2,-2],[1,-2],[2,-1],[1,-1]]#,[0,-1],[1,0]]
+        northEastCheckList =    [[3,3],[2,3],[3,2],[2,2],[1,2],[2,1],[1,1]]#,[0,1],[1,0]]
+        
+        #These check if the robot is directly by the wall and logic tries to move robot to be atleast 1 element way from wall
+        northCloseCheck =       [[0,1]]     #[[-1,1],[0,1],[1,1]]
+        westCloseCheck =        [[-1,0]]    #[[-1,-1],[-1,0],[-1,1]]
+        southCloseCheck =       [[0,-1]]    #[[-1,-1],[0,-1],[1,-1]]
+        eastCloseCheck =        [[1,0]]     #[[1,-1],[1,0],[1,1]]
+        
+        
+        print('northCheckList', sys.getsizeof(westCheckList))
+        print('westCheckList', sys.getsizeof(westCheckList))
+        print('southWestCheckList', sys.getsizeof(westCheckList))
+        
+        
+        
         
         

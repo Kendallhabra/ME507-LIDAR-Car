@@ -18,13 +18,14 @@ print(bno.begin())
 
 def read():
 	print(bno.read_euler())
-	print(bno.get_system_status())
+	print(bno.read_quaternion())
 def toggleLED():
 	pyb.LED(4).toggle()
 def sayHello():
 	print("Hello world!")
 def sayTime():
-	print(pyb.millis())
+	pass
+	# print(pyb.millis())
 def garbageCollect():
 	gc.collect()
 
@@ -32,9 +33,9 @@ def garbageCollect():
 # Calls starts at 0 and is used to control function calls.
 # Setting a higher priority will overwrite a lower priority in a given call of mainLoop.
 tasks = [
-	[read, 1000, 0, 0],
+	[read, 3000, 0, 0],
 	[toggleLED, 100, 0, 1],
-	[sayHello, 10000, 0, 0],
+	[sayHello, 100000, 0, 0],
 	[sayTime, 2000, 0, 0],
 	[garbageCollect, 1000, 0, 0],
 	]

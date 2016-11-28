@@ -209,7 +209,7 @@ class BNO055(object):
     def __init__(self):
         # If reset pin is provided save it and a reference to provided GPIO
         # bus (or the default system GPIO bus if none is provided).
-        self._i2c_device = I2C(1, I2C.MASTER, baudrate=100000)
+        self._i2c_device = I2C('Y', I2C.MASTER, baudrate=100000)
 
     def _write_bytes(self, address, data, ack=True):
         # Write a list of 8-bit values starting at the provided register address.
@@ -227,7 +227,7 @@ class BNO055(object):
   
     def _read_byte(self, address):
         # Read an 8-bit unsigned value from the provided register address.
-        return self._i2c_device.mem_read(1, BNO055_ADDRESS_A, address)
+        return struct.unpack('B', self._i2c_device.mem_read(1, BNO055_ADDRESS_A, address))[0]
 
     def _read_signed_byte(self, address):
         # Read an 8-bit signed value from the provided register address.
@@ -257,7 +257,8 @@ class BNO055(object):
         # commands (this seems to be necessary after a hard power down).
         try:
             self._write_byte(BNO055_PAGE_ID_ADDR, 0, ack=False)
-        except IOError:
+        except:
+            #except IOError:
             # Swallow an IOError that might be raised by an I2C issue.  Only do
             # this for this very first command to help get the BNO and board's
             # I2C into a clear state ready to accept the next commands.
@@ -270,6 +271,7 @@ class BNO055(object):
         if bno_id != BNO055_ID:
             return False
         # Reset the device.
+        '''
         if self._rst is not None:
             # Use the hardware reset pin if provided.
             # Go low for a short period, then high to signal a reset.
@@ -280,6 +282,8 @@ class BNO055(object):
             # Else use the reset command.  Note that ack=False is sent because
             # the chip doesn't seem to ack a reset in serial mode (by design?).
             self._write_byte(BNO055_SYS_TRIGGER_ADDR, 0x20, ack=False)
+        '''
+        self._write_byte(BNO055_SYS_TRIGGER_ADDR, 0x20, ack=False)
         # Wait 650ms after reset for chip to be ready (as suggested
         # in datasheet).
         time.sleep(0.65)

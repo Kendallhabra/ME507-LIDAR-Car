@@ -3,6 +3,23 @@
 This file holds all information regarding the servo object.
 '''
 
+class ServoTask(object):
+    
+    prevServoAngle = 0
+    servoAngle = 0
+    atAngle = False
+
+    def __init__(self, servoPin, offset = 0):
+        self.servo = 
+        return
+
+    def run():
+        angleChange = abs(servoAngle - prevServoAngle)
+        self.transitTime = 
+
+
+
+
 class Servo(object):
     '''
     '''

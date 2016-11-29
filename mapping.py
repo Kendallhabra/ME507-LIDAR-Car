@@ -204,7 +204,7 @@ class mapObj(object):
             '''
             Iterates through each bit printing only the bit with no spaces. 
             '''
-            if self.arrayElements - (dictionary['positionX']*-1+self.arrayWidth/2 + 1 + (dictionary['positionY']+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
+            if self.arrayElements - (dictionary['x']/self.resolution*-1+self.arrayWidth/2 + 1 + (dictionary['y']/self.resolution+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
                 '''
                 If the Robot is the current data point then it prints the robot character '*'
                 '''
@@ -269,7 +269,7 @@ class mapObj(object):
             '''
             Iterates through each bit printing only the bit with no spaces. 
             '''
-            if self.arrayElements - (round(dictionary['positionX']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['positionY']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
+            if self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
                 print(self.robot, end="")
             elif self.map[self.iterateRow*self.arrayLength+self.iterateCol] == 1:
                 print(self.emptyType, end="")#printing a single bit
@@ -314,47 +314,52 @@ if __name__ == '__main__':
     mapWidth =  30       # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
     resolution = .302*.5 # .302#Test with .5 #meters Even fraction Note: see previous note 
     
-    #Test scanMain array********************************************************
-    class scanMain():
-        print('scanMain Object created')
+    #Test scanMain123 array********************************************************
+    class scan():
+        print('scanMain123 Object created')
         
     #Dictionary for lookup of location
-    dictionary = {'positionX': 7, 'positionY':5}
+    class position():
+        pass
+        
+        
+    position.pos = {'x': 3, 'y':8}
     
     ''' use if you need to check orgin location
-    scanMain.posX=array.array('f',[10,10,10,10,10,10,10,10,10,10,10,0,0,0,0,0,0,0,0,0,0,0])
-    scanMain.posY=array.array('f',[9,8,7,6,5,4,3,2,1,0,-1,9,8,7,6,5,4,3,2,1,0,-1])    
-    scanMain.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
-    scanMain.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
+    scanMain123.posX=array.array('f',[10,10,10,10,10,10,10,10,10,10,10,0,0,0,0,0,0,0,0,0,0,0])
+    scanMain123.posY=array.array('f',[9,8,7,6,5,4,3,2,1,0,-1,9,8,7,6,5,4,3,2,1,0,-1])    
+    scanMain123.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
+    scanMain123.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
     '''
+    scanMain123 = scan()
     
-    scanMain.posX=array.array('f',[1,2,1,5,5.5,-4.5,-5,0,0,0,0,1,0,-1,0,.5,0,-.5,0,10,-9.6])
-    scanMain.posY=array.array('f',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5,10,-9.6])    
-    scanMain.headingPlusServoAngle=array.array('f',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
-    scanMain.distance=array.array('f',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
+    scanMain123.posX=array.array('f',[1,2,1,5,5.5,-4.5,-5,0,0,0,0,1,0,-1,0,.5,0,-.5,0,10,-9.6])
+    scanMain123.posY=array.array('f',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5,10,-9.6])    
+    scanMain123.headingPlusServoAngle=array.array('f',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
+    scanMain123.distance=array.array('f',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
 
     #create test map
-    mapMain = mapObj(mapHeight, mapWidth, resolution) 
+    mapMain123 = mapObj(mapHeight, mapWidth, resolution) 
     #Test run mapTask()
-    mapMain.mapTask(scanMain)
+    mapMain123.mapTask(scanMain123)
     #Print Map 
     
-    mapMain.printMap(dictionary)
+    mapMain123.printMap(position.pos)
     
     #Testing readPoint    
     print('Testing readPoint')    
-    a = mapMain.readPointXY(0,5)
+    a = mapMain123.readPointXY(0,5)
     print('(0,5) bit:',a,'\n')    
-    a = mapMain.readPointXY(5,0)
+    a = mapMain123.readPointXY(5,0)
     print('(5,0) bit:',a,'\n')    
-    a= mapMain.readPointXY(0,0)
+    a= mapMain123.readPointXY(0,0)
     print('(0,0) bit:',a,'\n')    
-    a= mapMain.readPointXY(0,5.5)
+    a= mapMain123.readPointXY(0,5.5)
     print('(0,5.5) bit:',a)
     #fancy Map test type = 0
-    mapMain.printMapFancy(dictionary,0)
+    mapMain123.printMapFancy(position.pos,0)
     
     import sys
-    print('mapMain',sys.getsizeof(mapMain))
-    print('mapMain.map',sys.getsizeof(mapMain.map))
-    print('mapMain.writeMap',sys.getsizeof(mapMain.writeMap))
+    print('mapMain123',sys.getsizeof(mapMain123))
+    print('mapMain123.map',sys.getsizeof(mapMain123.map))
+    print('mapMain123.writeMap',sys.getsizeof(mapMain123.writeMap))

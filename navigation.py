@@ -39,7 +39,7 @@ class navObj():
         self.explorerCounter = 1
         
         #*************************
-        self.wayPointdistance = 3 #[3 for operation!!! 1 for simulation ] a number between 1 and 3 insure its in the scanned region
+        self.wayPointdistance = 3 #[3 for operation!!! 1 for simulation tip change in test code for simulation] a number between 1 and 3 insure its in the scanned region
         #*************************
         
         '''
@@ -68,20 +68,20 @@ class navObj():
         self.explorerEast = 2
         self.nothingHappened = 0 #ensure the robot does not stop if new waypoint is not set for some reason. It ensure logic runs on next cycle
         
-    def navTask(self,dictionary):
+    def navTask(self,dictionary,mapMain):
         '''
         Map task scans map and determines the wayPointSteps to be set.
         '''
-        self.scanMap(dictionary)
+        self.scanMap(dictionary,mapMain)
         self.setWayPoint()
     
-    def scanMap(self,dictionary):
+    def scanMap(self,dictionary,mapMain):
         '''
         Looks up the surrounding points in the map and determines which ones have objects.
         '''
         ##print('\nFinding near by objects....')
-        self.currentX = round(dictionary['positionX']/self.resolution)
-        self.currentY = round(dictionary['positionY']/self.resolution)
+        self.currentX = round(dictionary['x']/self.resolution)
+        self.currentY = round(dictionary['y']/self.resolution)
         
         self.numberScans = 7 # This is a 7x7=> 21 element search around robot. 
         '''Current nav map, with Robot:*  
@@ -105,7 +105,12 @@ class navObj():
 
             Searches the north direction by iterating through each element in a column until an object is found in one column
             '''
-            if mapMain.readPoint(self.arrayElements - ((round(self.currentX)+currentScan)*-1+self.arrayWidth/2 + 1 + ((round(self.currentY)+iObject)+self.arrayLength/2-1)*self.arrayLength)) == 1:
+            try:
+                value = mapMain.map[int(self.arrayElements - ((round(self.currentX)+currentScan)*-1+self.arrayWidth/2 + 1 + ((round(self.currentY)+iObject)+self.arrayLength/2-1)*self.arrayLength))]
+            except IndexError:
+                value = 1
+                
+            if value == 1:
                 '''
                 stores the X and Y coordinates of the object
                 '''
@@ -687,10 +692,13 @@ if __name__ == '__main__':
     resolution = .305*.5 #.305*.5 # .305*.5 #.302#Test with .5 #meters Even fraction Note: see previous note 
         
     #Test scan array********************************************************
-    class scanMain():
+    class scan():
         pass
         #print('scan Object created')
-
+    
+    scanMain123 = scan()
+    class position():
+        pass
     #*************************************************************************************************
     #  Test navigation assumes Robot only makes it 2 feet from its current waypoint before its updated
     #*************************************************************************************************
@@ -712,28 +720,31 @@ if __name__ == '__main__':
         X = 31*resolution  # 31*resolution#14*resolution
         Y =-12*resolution  #-12*resolution #resolution*-7
         
-        dictionary = {'positionX': X, 'positionY':Y} 
+        position.pos = {'x': X, 'y':Y} 
         
-        scanMain.posX=array.array('f',[x*resolution for x in [6,7,10,10,10,10,0,1,12,-10, -10,-11,-12,-10,-10,11,12,13,5,0,0,-10,32,22,30,20,28,26,24,18,16,14,12,10,28,31,26,29,28,0,0,-2,-4,-12,-12,-14,-14,-30,-28,-26,-24,-24,-24,-24,-30,-28,-26,-24,-24,-24,-24,9,7,3,3,10,10,10,9,15,16,17,18,0,-2,-3,-2,0,10,12,14,16]])
-        scanMain.posY=array.array('f',[y*resolution for y in [3,3,10,11,12,10,0,1,0,0,-6,-6,-6,-9,-11,-9,-9,-9,-3,-8,-7,3,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-5,-3,10,12,14,16,18,-3,31,29,31,31,29,31,29,0,0,0,0,2,4,6,-6,-6,-6,-6,-8,-10,-12,1,-3,-3,2,9,7,5,4,30,30,30,30,-30,-29,-27,-25,-24,-31,-29,-27,-25]])    
-        scanMain.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
-        scanMain.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
-        mapMain = mapping.mapObj(mapHeight, mapWidth, resolution)
+        scanMain123.posX=array.array('f',[x*resolution for x in [6,7,10,10,10,10,0,1,12,-10, -10,-11,-12,-10,-10,11,12,13,5,0,0,-10,32,22,30,20,28,26,24,18,16,14,12,10,28,31,26,29,28,0,0,-2,-4,-12,-12,-14,-14,-30,-28,-26,-24,-24,-24,-24,-30,-28,-26,-24,-24,-24,-24,9,7,3,3,10,10,10,9,15,16,17,18,0,-2,-3,-2,0,10,12,14,16]])
+        scanMain123.posY=array.array('f',[y*resolution for y in [3,3,10,11,12,10,0,1,0,0,-6,-6,-6,-9,-11,-9,-9,-9,-3,-8,-7,3,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-5,-3,10,12,14,16,18,-3,31,29,31,31,29,31,29,0,0,0,0,2,4,6,-6,-6,-6,-6,-8,-10,-12,1,-3,-3,2,9,7,5,4,30,30,30,30,-30,-29,-27,-25,-24,-31,-29,-27,-25]])    
+        scanMain123.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
+        scanMain123.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
+        mapMain123 = mapping.mapObj(mapHeight, mapWidth, resolution)
         navMain = navObj(mapHeight, mapWidth, resolution)
         #print('scan width 0000000',round(7*resolution,2),'m',round(7*resolution*3.28,2),'ft') 
          
-        mapMain.writeMap(scanMain)
+        mapMain123.writeMap(scanMain123)
         counter = 0
         nothingHappenedCounter = 0
         navMain.wayPointdistance = 1
         
-        numberOfIterations = 1   #146#123 at 9999
+        numberOfIterations = 146   #146#123 at 9999
         
         while counter < numberOfIterations: 
             ##print('\nIteration', counter, '***************************************************')
-            navMain.navTask(dictionary)
-            mapMain.printMapFancy(dictionary,0,0)
-            dictionary = {'positionX': navMain.wayPoint[0], 'positionY':navMain.wayPoint[1]}
+            navMain.navTask(position.pos,mapMain123)
+            mapMain123.printMapFancy(position.pos,0,0)
+            position.pos = {'x': navMain.wayPoint[0], 'y':navMain.wayPoint[1]}
+            
+            
+            
             counter +=1
             #print('position',[navMain.currentX,navMain.currentY],'wayPoint',[navMain.wayPointSteps[0],navMain.wayPointSteps[1]])  
             #print('north',navMain.north)
@@ -769,8 +780,8 @@ if __name__ == '__main__':
         print('navMain',sys.getsizeof(navMain))
         print('navMain.setWayPoint',sys.getsizeof(navMain.setWayPoint))
         print('navMain.scanMap',sys.getsizeof(navMain.scanMap))
-        print('scanMain',sys.getsizeof(scanMain))
-        print('scanMain.posX',sys.getsizeof(scanMain.posX))
+        print('scanMain123',sys.getsizeof(scanMain123))
+        print('scanMain123.posX',sys.getsizeof(scanMain123.posX))
         
         
         northCheckList =        [[-1,3],[0,3],[1,3],[-1,2],[0,2],[1,2],[-1,1],[0,1],[1,1]]

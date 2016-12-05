@@ -8,15 +8,15 @@ class RangeFinder(object):
     '''
     
     def __init__(self, rangeFinderPin, cal):
-        self.distance = 0
-        # Set up encoder.
+        self.adc = pyb.ADC(rangeFinderPin)
         return
     
     def getRaw(self):
         pass
 
     def getDistance(self):
-        pass
+        val = self.adc.read()
+        
     
 if __name__ == '__main__':
     print('Running Test Code for: motor.py')

@@ -10,7 +10,7 @@ import pyb
 import micropython
 import gc
 
-# import position
+import position
 
 micropython.alloc_emergency_exception_buf(100)
 
@@ -59,12 +59,12 @@ servoAngle = 45
 servoHead = pyb.Servo(1)
 servoSteer = pyb.Servo(2)
 
-servoSteer.angle(servoAngle)
+# servoSteer.angle(servoAngle)
 
-# positionTask = position.PositionTask()
+positionTask = position.PositionTask()
 
 def read():
-#	print(positionTask.pos[x], ", ", positionTask.pos[y])
+	print(positionTask.pos[x], ", ", positionTask.pos[y])
 	#print(bno.read_euler())
 	#print(bno.read_quaternion())
 	pass
@@ -91,13 +91,13 @@ def setServo():
 # Calls starts at 0 and is used to control function calls.
 # Setting a higher priority will overwrite a lower priority in a given call of mainLoop.
 tasks = [
-#	[read, 1000, 0, 0],
+	[read, 1000, 0, 0],
 	[toggleLED, 100, 0, 1],
 	[sayHello, 100000, 0, 0],
 	[sayTime, 2000, 0, 0],
 	[garbageCollect, 1000, 0, 0],
-#	[positionTask.run(), 10, 0, 0],
-	[setServo, 2000, 0, 0],
+	[positionTask.run(), 10, 0, 0],
+#	[setServo, 2000, 0, 0],
 	]
 
 def mainLoop():

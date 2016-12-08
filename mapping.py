@@ -14,6 +14,8 @@ class mapObj(object):
         '''
         Creates the map first time map is run and ajusts the array size (lenght and width) in the case that they are not interger values.
         '''
+        self.saveMapFlag = 0
+        
         
         print('Initializing mapTask.....')
         #Determines the number of elements in array
@@ -62,6 +64,11 @@ class mapObj(object):
             self.map[rowIter*self.arrayWidth] = 1
             self.map[rowIter*self.arrayWidth +self.arrayWidth-1] = 1
             rowIter +=1
+            
+        #Create an intial timer count
+        if __name__ != '__main__':
+            self.saveMapInterval = 10000 #ms or 10 seconds till next save
+            self.runTime = pyb.millis() + self.saveMapInterval
 
         return
 
@@ -72,6 +79,8 @@ class mapObj(object):
         #print('mapTask')
         #self.printMap()
         self.writeMap(scanMain)
+        if __name__ != '__main__':
+            self.saveMapTimed(1) #1 means it will overwrite last saved map so no backups
         return
 
     
@@ -229,7 +238,7 @@ class mapObj(object):
         print('\n')
         return   
     
-    def saveMap(self,dictionary = False):
+    def saveMap(self,overWriteFile = 0,dictionary = False):
 
         #If code is on pyboard it changes /sd directory
         if __name__ == '__main__':
@@ -245,7 +254,7 @@ class mapObj(object):
         i = 1
         #print(os.path.exists(pyboardSD + name_of_file+'.txt'))
         print('Determine new map file name')
-        while os.path.exists(pyboardSD + name_of_file+'.txt') == True:
+        while os.path.exists(pyboardSD + name_of_file+'.txt') == True and overWriteFile==1:
             '''
             If the map exits we index to the next file name 
             '''
@@ -288,16 +297,78 @@ class mapObj(object):
                 self.iterateRow +=1 
                 self.iterateCol = 0
                 mapString = mapString+"\n"
-   
-        
-        
         mapFile.write(mapString)
 
         mapFile.close()
         print('Done')    
     
+    def saveMapTimed(self,overWriteFile = 0,dictionary = False):
     
-    
+        if pyb.millis > self.runTime:
+        
+            #If code is on pyboard it changes /sd directory
+            if __name__ == '__main__':
+                pyboardSD = ''
+                save_path = os.getcwd()
+                
+            else:
+                pyboardSD = '/sd'
+                save_path = os.getcwd()+pyboardSD 
+
+            name_of_file = "Map0"
+
+            i = 1
+            #print(os.path.exists(pyboardSD + name_of_file+'.txt'))
+            print('Determine new map file name')
+            while os.path.exists(pyboardSD + name_of_file+'.txt') == True and overWriteFile==1:
+                '''
+                If the map exits we index to the next file name 
+                '''
+                name_of_file = "Map"+str(i)
+                #print(name_of_file)
+                #print(os.path.exists(pyboardSD + name_of_file+'.txt'))
+                i +=1
+
+            print('Writing file'+ name_of_file+'.txt ...')    
+            completeName = os.path.join(save_path, name_of_file+".txt")         
+            mapFile = open(completeName, "w")
+            #************************************************************************************************************************
+
+            mapString = ""
+            self.iterateCol = 0
+            self.iterateRow = 0
+            exitFlag = 0
+            while exitFlag == 0:
+                '''
+                Iterates through each bit printing only the bit with no spaces. 
+                '''
+                if dictionary != False and self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
+                    '''
+                    If the Robot is the current data point then it prints the robot character '*'
+                    '''
+                    mapString = mapString+'*'
+                else:
+                    mapString = mapString+str(self.map[self.iterateRow*self.arrayLength+self.iterateCol])#printing a single bit
+                self.iterateCol +=1
+                
+                if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:
+                    '''
+                    If map complete we exit
+                    '''
+                    exitFlag = 1
+                elif self.iterateCol == self.arrayWidth:
+                    '''
+                    otherwise if the end of a row has been reached we move to the next row
+                    '''
+                    self.iterateRow +=1 
+                    self.iterateCol = 0
+                    mapString = mapString+"\n"
+            mapFile.write(mapString)
+
+            mapFile.close()
+            print('Done') 
+            self.runTime = pyb.millis() + self.servoWait
+        return
     
     
     def printMapFancy(self,dictionary,fill=0,legend=1): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
@@ -417,7 +488,11 @@ if __name__ == '__main__':
     #Print Map 
     
     mapMain123.printMap(position.pos)
-    mapMain123.saveMap()
+    
+    #***********************************************************
+    # Test SaveMap commented so it does not spam current directory******************
+    #*****************************************************
+    mapMain123.saveMap(0)
     
     
     
@@ -432,7 +507,7 @@ if __name__ == '__main__':
     a= mapMain123.readPointXY(0,5.5)
     print('(0,5.5) bit:',a)
     #fancy Map test type = 0
-    mapMain123.printMapFancy(position.pos)
+    mapMain123.printMapFancy(position.pos,1)
     
     import sys
     print('mapMain123',sys.getsizeof(mapMain123))

@@ -168,86 +168,8 @@ class mapObj(object):
                 self.exitFlag = 1
         return 
     
-    def readPointXY(self,x,y):
-        '''
-        Reads a specified coordinate
-        '''
-        self.newDataRead = [round(x/self.resolution),round(y/self.resolution)]
-        
-        if self.newDataRead[1] > self.numberRowAboveOrgin: #ensures point within 'Northern' bound
-            '''
-            Each of these condition prevents error due to points that are off the map
-            '''           
-            print('\n(readPoint Warning) readPoint Out of map range Y upper, assume wall!!!!!!!!!!!!!')
-            print('Point in steps',self.newDataRead)
-            print('numberRowAboveOrgin',self.numberRowAboveOrgin,'\n')
-            value = 1 #We can't go off the map so we assume its an object to prevent nav from doing otherwise
-        elif self.newDataRead[1] < -self.numberRowBlowOrgin:  #ensures point within 'Southern' bound
-            print('\n(readPoint Warning) readPoint Out of map range Y lower, assume wall!!!!!!!!!!!!!')
-            print('Point in steps',self.newDataRead)
-            print('numberRowBelowOrgin',self.numberRowBlowOrgin,'\n')
-            value = 1 
-        elif self.newDataRead[0] > self.numberColumnRight: #ensures point within 'Eastern' bound
-            print('\n(readPoint Warning) readPoint Out of map range X upper, assume wall!!!!!!!!!!!!!')
-            print('Point in steps',self.newDataRead)
-            print('numberColumnRight',self.numberColumnRight,'\n')
-            value = 1
-        elif self.newDataRead[0] < -self.numberColumnLeft: #ensures point within 'Western' bound
-            print('\n(readPoint Warning) readPoint Out of map range X lower, assume wall!!!!!!!!!!!!!')
-            print('Point in steps',self.newDataRead)
-            print('numberColumnLeft',self.numberColumnLeft,'\n')
-            value = 1
-        else:
-            '''
-            If the point is on the map it is set to value and returned
-            '''
-            value = self.map[self.middleElement-1+self.newDataRead[0]-self.newDataRead[1]*self.arrayWidth] #-1 because count from 0 no du 
-            #print('Bit: ',value)
-            
-        return value
-    '''    
-    def printMap(self,dictionary): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
-        '''
-        #Prints the Map in the best readable formate I have found so far without 3rd party modules
-        '''
-        print('\n********************Printing map*********************\n')
-        print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
-        print('Map width:',round(self.arrayWidth*self.resolution*3.28,1),'ft Map Length:', round(self.arrayLength*self.resolution*3.28,1),'ft Resolution', round(self.resolution*3.28,4),'ft\n')
-        print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
-        print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
-        print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
-        
-        self.iterateCol = 0
-        self.iterateRow = 0
-        exitFlag = 0
-        while exitFlag == 0:
-            '''
-            #Iterates through each bit printing only the bit with no spaces. 
-            '''
-            if self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
-                '''
-                #If the Robot is the current data point then it prints the robot character '*'
-                '''
-                print('*', end="")
-            else:
-                print(self.map[self.iterateRow*self.arrayLength+self.iterateCol], end="")#printing a single bit
-            self.iterateCol +=1
-            
-            if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:
-                '''
-                #If map complete we exit
-                '''
-                exitFlag = 1
-            elif self.iterateCol == self.arrayWidth:
-                '''
-                #otherwise if the end of a row has been reached we move to the next row
-                '''
-                self.iterateRow +=1 
-                self.iterateCol = 0
-                print(end="\n")
-        print('\n')
-        return   
-    '''
+
+    
     def saveMap(self,overWriteFile = 0,dictionary = False):
 
         #If code is on pyboard it changes /sd directory
@@ -273,7 +195,7 @@ class mapObj(object):
             #print(os.path.exists(pyboardSD + name_of_file+'.txt'))
             i +=1
 
-        print('Writing file'+ name_of_file+'.txt ...')    
+        print('Writing file '+ name_of_file+'.txt ...')    
         completeName = os.path.join(save_path, name_of_file+".txt")         
         mapFile = open(completeName, "w")
 
@@ -383,232 +305,11 @@ class mapObj(object):
             self.runTime = pyb.millis() + self.servoWait
         return
     
-    '''
-    def printMapFancy(self,dictionary,fill=0,legend=1): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
-        '''
-        #Prints the Map in the best readable formate I have found so far without 3rd party modules
-        '''
-        if legend == 1:
-            print('\n********************Printing map*********************\n')
-            print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
-            print('Map width:',round(self.arrayWidth*self.resolution*3.28,1),'ft Map Length:', round(self.arrayLength*self.resolution*3.28,1),'ft Resolution', round(self.resolution*3.28,4),'ft\n')
-            print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
-            print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
-            print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
+    
+ 
 
-        if fill == 1:
-            '''
-            #Based on the input the fill type is selected
-            '''
-            self.fillType = '0'
-            self.emptyType = ' '
-            self.robot = '*'
-        else:
-            self.fillType = ' '
-            self.emptyType = '0'
-            self.robot = '*'
-        if legend == 1:
-            print('Legend: Robot - * ,','Object - ',self.emptyType,', Empty Space if applicable - ',self.fillType)
-        self.iterateCol = 0
-        self.iterateRow = 0
-        exitFlag = 0
-        iter = 0
-        while iter < self.arrayWidth:
-            '''
-            # Prints map boarder
-            '''
-            print('*',end="")
-            iter +=1
-        print(end='\n')
         
-        while exitFlag == 0:
-            '''
-            #Iterates through each bit printing only the bit with no spaces. 
-            '''
-            if self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
-                print(self.robot, end="")
-            elif self.map[self.iterateRow*self.arrayLength+self.iterateCol] == 1:
-                print(self.emptyType, end="")#printing a single bit
-
-            else:
-                print(self.fillType,end="")
-            self.iterateCol +=1
-            
-            if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:#If map complete we exit
-                exitFlag = 1
-            elif self.iterateCol == self.arrayWidth:#otherwise if the end of a row has been reached we move to the next row
-                self.iterateRow +=1 
-                self.iterateCol = 0
-                print(end="*\n")
-                
-        iter = 0
-        print(end='*\n')
-        while iter < self.arrayWidth:
-            print('*',end="")
-            iter +=1
-        print(end='\n')
-        return  
-    '''    
-    def readPoint(self,point):
-        '''
-        reads map based on bitarray coordinates aka element number
-        '''
-        try:
-            value = self.map[int(point)]
-        except IndexError:
-            value = 1
-       
-        return value   
-    '''
-    def printMapGUI(self,dictionary): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
-        '''
-        #Prints the Map in the best readable formate I have found so far without 3rd party modules
-        '''
-        # print('\n********************Printing map*********************\n')
-        # print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
-        # print('Map width:',round(self.arrayWidth*self.resolution*3.28,1),'ft Map Length:', round(self.arrayLength*self.resolution*3.28,1),'ft Resolution', round(self.resolution*3.28,4),'ft\n')
-        # print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
-        # print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
-        # print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
-        
-        import tkinter #import here is pyboard does not try and do this
-        self.root = tkinter.Tk()
-        self.canvas = tkinter.Canvas(self.root)
-        self.canvas.pack()
-        self.canvas.config(width=790, height=790)
-        
-        
-        self.iterateCol = 0
-        self.iterateRow = 0
-        exitFlag = 0
-        mapPixels = 4
-        while exitFlag == 0:
-            '''
-            #Iterates through each bit printing only the bit with no spaces. 
-            '''
-            if self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
-                '''
-                #If the Robot is the current data point then it prints the robot character '*'
-                '''
-                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="red")
-            elif self.map[self.iterateRow*self.arrayLength+self.iterateCol]==1:
-                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="white")
-            else:
-                
-                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="black")
-
-            self.iterateCol +=1
-            
-            if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:
-                '''
-                #If map complete we exit
-                '''
-                exitFlag = 1
-            elif self.iterateCol == self.arrayWidth:
-                '''
-                #otherwise if the end of a row has been reached we move to the next row
-                '''
-                self.iterateRow +=1 
-                self.iterateCol = 0
-            #self.after(20,printMapGUI) 
-            #self.root.update()
-        
-<<<<<<< HEAD
-        return   
-     '''   
-        
-        
-=======
-        return             
->>>>>>> origin/master
-        
-    def printSavedMap(self): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
-        '''
-        Prints the Map in the best readable formate I have found so far without 3rd party modules
-        '''
-        # print('\n********************Printing map*********************\n')
-        # print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
-        # print('Map width:',round(self.arrayWidth*self.resolution*3.28,1),'ft Map Length:', round(self.arrayLength*self.resolution*3.28,1),'ft Resolution', round(self.resolution*3.28,4),'ft\n')
-        # print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
-        # print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
-        # print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
-        Filetrueorfalse = 0
-        import re
-        while Filetrueorfalse ==0:
-            '''Take a file name input from use and check that it exists before continuing and throughs error if it is invalid
-            '''
-            mapFilename = input("Input Map file name and extention and hit enter to plot(map0.txt): ")#input file name
-
-            if os.path.isfile(mapFilename):#If else checks for file before contining 
-                Filetrueorfalse = 1
-            else: 
-                print(' \n!!!Warning!!! \nFile does not exist in program directory ensure correct name and extention. \nExamples include: name.extention , name.csv , name.txt\n\n')
-
-        with open (mapFilename, "r") as myfile: #Inspired by example in python documentation 
-            '''Imports characters from file removes any non-number characters and seperates them into 1 by 2 matrixs
-            '''
-            mapdata=myfile.read()#imports characters as string for each line
-            mapdata = mapdata.split('>')
-            resolution = round(float(re.sub("[<]", "",mapdata[0] )),3)
-            map = mapdata[1]
-            numberOfCol = map.count('\n')+1
-            map = re.sub("[\n]", "",map )
-            numberOfElements = len(map)
-            numberOfRows = int(numberOfElements/numberOfCol)
-            print('\n\nOpening ', mapFilename,'...')
-            print('Number of Columns', numberOfCol)
-            print('Number of Rows',numberOfRows)
-            print('Number of Elements', numberOfElements)
-            print('Map width:',round(numberOfCol*resolution,1),'m Map Length:', round(numberOfRows*resolution,1),'m Resolution', round(resolution,4),'m')
-            print('Map width:',round(numberOfCol*resolution*3.28,1),'ft Map Length:', round(numberOfRows*resolution*3.28,1),'ft Resolution', round(resolution*3.28,4),'ft\n')
-        import tkinter #import here is pyboard does not try and do this
-        
-        mapPixels = 4
-        
-        self.root = tkinter.Tk()
-        self.canvas = tkinter.Canvas(self.root)
-        self.canvas.pack()
-        self.canvas.config(width=numberOfRows*mapPixels-2, height=numberOfCol*mapPixels-2)
-        
-        
-        self.iterateCol = 0
-        self.iterateRow = 0
-        exitFlag = 0
-        
-        while exitFlag == 0:
-            '''
-            Iterates through each bit printing only the bit with no spaces. 
-            '''
-            #print('running')
-            if   map[self.iterateRow*numberOfCol+self.iterateCol] == '*':
-                print('*******************************************')
-                '''
-                If the Robot is the current data point then it prints the robot character '*'
-                '''
-                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="red", fill="red")
-            elif map[self.iterateRow*numberOfCol+self.iterateCol]== '1':
-                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="white")
-                #print('111111111111111111111111111111111111111')
-            else:
-                #print('0')
-                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="black")
-
-            self.iterateCol +=1
-            
-            if (self.iterateRow+1)*(self.iterateCol) == numberOfElements:
-                '''
-                If map complete we exit
-                '''
-                exitFlag = 1
-            elif self.iterateCol == numberOfCol:
-                '''
-                otherwise if the end of a row has been reached we move to the next row
-                '''
-                self.iterateRow +=1 
-                self.iterateCol = 0
-            
-        
-        return   
+ 
         
         
         
@@ -685,33 +386,11 @@ if __name__ == '__main__':
     mapMain123.mapTask(scanMain123)
     #Print Map 
     
-    #mapMain123.printMap(position.pos)
+    
     
     #***********************************************************
     # Test SaveMap commented so it does not spam current directory******************
     #*****************************************************
-    mapMain123.saveMap(0)
+    mapMain123.saveMap(1)
     
     
-    
-    #Testing readPoint    
-    print('Testing readPoint')    
-    a = mapMain123.readPointXY(0,5)
-    print('(0,5) bit:',a,'\n')    
-    a = mapMain123.readPointXY(5,0)
-    print('(5,0) bit:',a,'\n')    
-    a= mapMain123.readPointXY(0,0)
-    print('(0,0) bit:',a,'\n')    
-    a= mapMain123.readPointXY(0,5.5)
-    print('(0,5.5) bit:',a)
-    #fancy Map test type = 0
-    #mapMain123.printMapFancy(position.pos,1)
-    #mapMain123.printMapGUI(position.pos)
-    mapMain123.printSavedMap()
-    
-    
-    
-    import sys
-    # print('mapMain123',sys.getsizeof(mapMain123))
-    # print('mapMain123.map',sys.getsizeof(mapMain123.map))
-    # print('mapMain123.writeMap',sys.getsizeof(mapMain123.writeMap))

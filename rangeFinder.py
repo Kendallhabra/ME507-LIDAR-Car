@@ -15,7 +15,7 @@ class RangeFinder(object):
     
     def getRaw(self):
         ''' returns adc reading from sensor [V] '''
-        return self.adc.read() * 3.3 / (2^16)
+        return self.adc.read() * 3.3 / (2^12)
 
     def getDistance(self):
         ''' Returns distance from sensor [m] '''

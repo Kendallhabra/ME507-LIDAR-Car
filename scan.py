@@ -2,8 +2,9 @@
 '''
 This file holds all information regarding the sensors and scanning
 '''
+import array
 
-class scan(object):
+class scanTask(object):
     '''
     '''
     
@@ -12,7 +13,11 @@ class scan(object):
         self.posY = array.array('f')
         self.headingPlusServoAngle = array.array('f')
         self.distance = array.array('f')
+        
         self.sensorOffset = array.array('f', [ -45 , -45 , 45 , 45 ] ) # Angle of each sensor wrt servo [deg]
+        self.servo = Servo.Servo( 1, offset = 0)
+        self.angles = array.array('f', [-90, 90, 15] ) # start angle, max angle, inc angle
+        self.servoWait = 50 # ms of wait time for servo to reach new angle
         
         # Create rangeFinder driver objects 
         RF_dict = {
@@ -21,15 +26,31 @@ class scan(object):
             2 : RF_R1 = rangeFinder.rangeFinder( pin_R1 , cal_R1 ),
             3 : RF_R2 = rangeFinder.rangeFinder( pin_R2 , cal_R2 )
         }
+        
+        self.servo.setAngle(self.angles[0])
+        self.runTime = pyb.millis() + self.servoWait
+        
         return
     
-    def scanTask( self ): #, new servo angle , new motor speed ):
-        if servo.ready:
+    def run( self ):
+        
+        if pyb.millis > self.runTime:
             for sensor in range(4):
                 self.posX.append( position.pos['x'] )
                 self.posY.append( position.pos['y'] )
                 self.headingPlusServoAngle.append( position.pos['heading'] + servo.angle + self.sensorOffset[ servo ] )
                 self.distance.append( self.RF_dict[ sensor ].getDistance() )
+            
+            if self.servo.angle < self.angles[1]:
+                self.servo.setAngle( self.servo.angle + self.angles[2] )
+            else:
+                self.servo.setAngle( self.angles[0] )
+                
+            self.runTime = pyb.millis() + self.servoWait
+        
+        else:
+            pass
+        
         return
     
     

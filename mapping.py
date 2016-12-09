@@ -277,7 +277,7 @@ class mapObj(object):
         completeName = os.path.join(save_path, name_of_file+".txt")         
         mapFile = open(completeName, "w")
 
-        mapString = ""
+        mapString = '<'+str(self.resolution)+'>'
         self.iterateCol = 0
         self.iterateRow = 0
         exitFlag = 0
@@ -342,7 +342,7 @@ class mapObj(object):
             completeName = os.path.join(save_path, name_of_file+".txt")         
             mapFile = open(completeName, "w")
 
-            mapString = ""
+            mapString = '<'+str(self.resolution)+'>'
             self.iterateCol = 0
             self.iterateRow = 0
             exitFlag = 0
@@ -465,7 +465,7 @@ class mapObj(object):
         # print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
         # print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
         
-        import tkinter
+        import tkinter #import here is pyboard does not try and do this
         self.root = tkinter.Tk()
         self.canvas = tkinter.Canvas(self.root)
         self.canvas.pack()
@@ -507,10 +507,7 @@ class mapObj(object):
             #self.after(20,printMapGUI) 
             #self.root.update()
         
-        return   
-        
-        
-        
+        return             
         
     def printSavedMap(self): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
         '''
@@ -537,37 +534,45 @@ class mapObj(object):
         with open (mapFilename, "r") as myfile: #Inspired by example in python documentation 
             '''Imports characters from file removes any non-number characters and seperates them into 1 by 2 matrixs
             '''
-            map=myfile.read()#imports characters as string for each line
+            mapdata=myfile.read()#imports characters as string for each line
+            mapdata = mapdata.split('>')
+            resolution = round(float(re.sub("[<]", "",mapdata[0] )),3)
+            map = mapdata[1]
             numberOfCol = map.count('\n')+1
-            print(numberOfCol)
             map = re.sub("[\n]", "",map )
             numberOfElements = len(map)
             numberOfRows = int(numberOfElements/numberOfCol)
-            # print(numberOfElements)
-            # print(numberOfRows)
-            # print('arraylength',self.arrayLength)
-        import tkinter
+            print('\n\nOpening ', mapFilename,'...')
+            print('Number of Columns', numberOfCol)
+            print('Number of Rows',numberOfRows)
+            print('Number of Elements', numberOfElements)
+            print('Map width:',round(numberOfCol*resolution,1),'m Map Length:', round(numberOfRows*resolution,1),'m Resolution', round(resolution,4),'m')
+            print('Map width:',round(numberOfCol*resolution*3.28,1),'ft Map Length:', round(numberOfRows*resolution*3.28,1),'ft Resolution', round(resolution*3.28,4),'ft\n')
+        import tkinter #import here is pyboard does not try and do this
+        
+        mapPixels = 4
+        
         self.root = tkinter.Tk()
         self.canvas = tkinter.Canvas(self.root)
         self.canvas.pack()
-        self.canvas.config(width=790, height=790)
+        self.canvas.config(width=numberOfRows*mapPixels-2, height=numberOfCol*mapPixels-2)
         
         
         self.iterateCol = 0
         self.iterateRow = 0
         exitFlag = 0
-        mapPixels = 4
+        
         while exitFlag == 0:
             '''
             Iterates through each bit printing only the bit with no spaces. 
             '''
             #print('running')
             if   map[self.iterateRow*numberOfCol+self.iterateCol] == '*':
-                #print('*******************************************')
+                print('*******************************************')
                 '''
                 If the Robot is the current data point then it prints the robot character '*'
                 '''
-                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="red")
+                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="red", fill="red")
             elif map[self.iterateRow*numberOfCol+self.iterateCol]== '1':
                 self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="white")
                 #print('111111111111111111111111111111111111111')
@@ -631,7 +636,7 @@ if __name__ == '__main__':
     scanMain123.distance=array.array('f',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
     
 
-    changeMap = 1
+    changeMap = 0
     if changeMap == 1:
         mapHeight = 10        # 10#30      #5        # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
         mapWidth =  10        #10 #30      #5        # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
@@ -652,7 +657,10 @@ if __name__ == '__main__':
         scanMain123.posY=array.array('f',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5,10,-9.6])    
         scanMain123.headingPlusServoAngle=array.array('f',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
         scanMain123.distance=array.array('f',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
-
+        X = 13*resolution  # 31*resolution#14*resolution
+        Y =9*resolution  #-12*resolution #resolution*-7
+        
+        position.pos = {'x': X, 'y':Y}
         
 
     
@@ -669,7 +677,7 @@ if __name__ == '__main__':
     #***********************************************************
     # Test SaveMap commented so it does not spam current directory******************
     #*****************************************************
-    mapMain123.saveMap(1)
+    mapMain123.saveMap(0)
     
     
     

@@ -34,7 +34,7 @@ class Servo(object):
         return
     
     def setAngle(self, angle):
-        newAngle = self.coerce(0.0, 180.0, (angle - self.offset))
+        newAngle = self.coerce(-90, 90, (angle - self.offset))
         self.servo.angle(newAngle)
         self.angle = newAngle + self.offset
         return

@@ -60,8 +60,8 @@ mtrPWM.pulse_width_percent(0)
 encoderTask = encoder.EncoderTask(pins["Encoder A"], pins["Encoder B"])
 positionTask = position.PositionTask(encoderTask)
 statusLightTask = statusLight.StatusLightTask(pins["LED R"], pins["LED G"], pins["LED B"])
-scanTask = scan.ScanTask()
-mappingTask = mapping.mabObj(30, 30, 0.151)
+scanTask = scan.ScanTask(pins, positionTask)
+# mappingTask = mapping.mabObj(30, 30, 0.151)
 
 def coerce(x, a, b):
 	return min(b, max(x, a))
@@ -88,15 +88,15 @@ ext = pyb.ExtInt(pins["Stop Btn"], pyb.ExtInt.IRQ_FALLING, pyb.Pin.PULL_NONE, st
 batVoltageADC = pyb.ADC(pins["Battery Voltage"])
 batVoltage = 0
 
-bluetooth = pyb.UART(2, 9600)
-bluetooth.init(9600, bits=8, parity=None, stop=1)
+# bluetooth = pyb.UART(2, 9600)
+# bluetooth.init(9600, bits=8, parity=None, stop=1)
 
 servoAngle = 45
 servoHead = pyb.Servo(1)
 servoSteer = pyb.Servo(2)
 
 servoHead.angle(0)
-servoSteer.angle(0)
+servoSteer.angle(45)
 
 def randInt(a, b):
 	return int(pyb.rng()*((b-a)/1073741824)+a)
@@ -186,6 +186,7 @@ tasks = [
 	[setMotor, 100, 0, 5],
 	[setLight, 1000, 0, 5],
 	[scanTask.run, 100, 0, 5],
+	[scanTask.popToSerial, 50, 0, 5],
 #	[mapTask.mapTask, 100, 0, 5],
 #	[setServo, 2000, 0, 0],
 	]

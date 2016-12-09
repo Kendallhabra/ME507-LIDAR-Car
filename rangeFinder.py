@@ -14,12 +14,14 @@ class RangeFinder(object):
         return
     
     def getRaw(self):
-        ''' returns adc reading from sensor [V] '''
-        return self.adc.read() * 3.3 / (2^12)
+        # ''' returns adc reading from sensor [V] '''
+        #return self.adc.read() * 3.3 / (2^12)
+        return self.adc.read()
 
     def getDistance(self):
-        ''' Returns distance from sensor [m] '''
-        return cal[0] + cal[1] /( self.getRaw() + cal[2] )
+        ''' Returns distance from sensor [in] '''
+        print(self.adc.read())
+        return self.cal[0] + self.cal[1]/( self.adc.read()/819.0 + self.cal[2] )
     
 if __name__ == '__main__':
     print('Running Test Code for: RangeFinder.py ... But nothing happened')

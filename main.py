@@ -160,9 +160,9 @@ def getVoltage():
 	print("Battery Voltage:", batVoltage)
 
 def setLight():
-	statusLightTask.r = (statusLightTask.r + randInt(0, 101))/2
-	statusLightTask.g = (statusLightTask.g + randInt(0, 101))/2
-	statusLightTask.b = (statusLightTask.b + randInt(0, 101))/2
+	statusLightTask.rNew = randInt(0, 101)
+	statusLightTask.gNew = randInt(0, 101)
+	statusLightTask.bNew = randInt(0, 101)
 
 # Each list in tasks holds [function, period in ms, calls, priority].
 # Calls starts at 0 and is used to control function calls.
@@ -178,7 +178,7 @@ tasks = [
 	[positionTask.run, 10, 0, 5],
 	[statusLightTask.run, 10, 0, 0],
 	[setMotor, 100, 0, 5],
-	[setLight, 10, 0, 5],
+	[setLight, 1000, 0, 5],
 #	[setServo, 2000, 0, 0],
 	]
 

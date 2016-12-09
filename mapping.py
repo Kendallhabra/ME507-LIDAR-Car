@@ -71,7 +71,10 @@ class mapObj(object):
         if __name__ != '__main__' and os.getcwd() =='/':
             self.saveMapInterval = 10000 #ms or 10 seconds till next save
             self.runTime = pyb.millis() + self.saveMapInterval
+        #***************
+       
 
+        #****************
         return
 
     def mapTask (self,scanMain):
@@ -451,7 +454,148 @@ class mapObj(object):
             value = 1
        
         return value   
-    
+    def printMapGUI(self,dictionary): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
+        '''
+        Prints the Map in the best readable formate I have found so far without 3rd party modules
+        '''
+        # print('\n********************Printing map*********************\n')
+        # print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
+        # print('Map width:',round(self.arrayWidth*self.resolution*3.28,1),'ft Map Length:', round(self.arrayLength*self.resolution*3.28,1),'ft Resolution', round(self.resolution*3.28,4),'ft\n')
+        # print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
+        # print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
+        # print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
+        
+        import tkinter
+        self.root = tkinter.Tk()
+        self.canvas = tkinter.Canvas(self.root)
+        self.canvas.pack()
+        self.canvas.config(width=790, height=790)
+        
+        
+        self.iterateCol = 0
+        self.iterateRow = 0
+        exitFlag = 0
+        mapPixels = 4
+        while exitFlag == 0:
+            '''
+            Iterates through each bit printing only the bit with no spaces. 
+            '''
+            if self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
+                '''
+                If the Robot is the current data point then it prints the robot character '*'
+                '''
+                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="red")
+            elif self.map[self.iterateRow*self.arrayLength+self.iterateCol]==1:
+                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="white")
+            else:
+                
+                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="black")
+
+            self.iterateCol +=1
+            
+            if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:
+                '''
+                If map complete we exit
+                '''
+                exitFlag = 1
+            elif self.iterateCol == self.arrayWidth:
+                '''
+                otherwise if the end of a row has been reached we move to the next row
+                '''
+                self.iterateRow +=1 
+                self.iterateCol = 0
+            #self.after(20,printMapGUI) 
+            #self.root.update()
+        
+        return   
+        
+        
+        
+        
+    def printSavedMap(self): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
+        '''
+        Prints the Map in the best readable formate I have found so far without 3rd party modules
+        '''
+        # print('\n********************Printing map*********************\n')
+        # print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
+        # print('Map width:',round(self.arrayWidth*self.resolution*3.28,1),'ft Map Length:', round(self.arrayLength*self.resolution*3.28,1),'ft Resolution', round(self.resolution*3.28,4),'ft\n')
+        # print('Extremes array units(bitmap units): \n(',-self.numberColumnLeft,self.numberRowAboveOrgin,') (',self.numberColumnRight,self.numberRowAboveOrgin,') (',self.numberColumnRight,-self.numberRowBlowOrgin,') (',-self.numberColumnLeft,-self.numberRowBlowOrgin,')\n')
+        # print('Extremes in meters:\n(',round(-self.numberColumnLeft*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(self.numberRowAboveOrgin*self.resolution,1),') (',round(self.numberColumnRight*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),') (',round(-self.numberColumnLeft*self.resolution,1),round(-self.numberRowBlowOrgin*self.resolution,1),')\n')
+        # print('Extremes in feet:\n(',round(-self.numberColumnLeft*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(self.numberRowAboveOrgin*self.resolution*3.28,1),') (',round(self.numberColumnRight*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),') (',round(-self.numberColumnLeft*self.resolution*3.28,1),round(-self.numberRowBlowOrgin*self.resolution*3.28,1),')\n')
+        Filetrueorfalse = 0
+        import re
+        while Filetrueorfalse ==0:
+            '''Take a file name input from use and check that it exists before continuing and throughs error if it is invalid
+            '''
+            mapFilename = input("Input Map file name and extention and hit enter to plot(map0.txt): ")#input file name
+
+            if os.path.isfile(mapFilename):#If else checks for file before contining 
+                Filetrueorfalse = 1
+            else: 
+                print(' \n!!!Warning!!! \nFile does not exist in program directory ensure correct name and extention. \nExamples include: name.extention , name.csv , name.txt\n\n')
+
+        with open (mapFilename, "r") as myfile: #Inspired by example in python documentation 
+            '''Imports characters from file removes any non-number characters and seperates them into 1 by 2 matrixs
+            '''
+            map=myfile.read()#imports characters as string for each line
+            numberOfCol = map.count('\n')+1
+            print(numberOfCol)
+            map = re.sub("[\n]", "",map )
+            numberOfElements = len(map)
+            numberOfRows = int(numberOfElements/numberOfCol)
+            # print(numberOfElements)
+            # print(numberOfRows)
+            # print('arraylength',self.arrayLength)
+        import tkinter
+        self.root = tkinter.Tk()
+        self.canvas = tkinter.Canvas(self.root)
+        self.canvas.pack()
+        self.canvas.config(width=790, height=790)
+        
+        
+        self.iterateCol = 0
+        self.iterateRow = 0
+        exitFlag = 0
+        mapPixels = 4
+        while exitFlag == 0:
+            '''
+            Iterates through each bit printing only the bit with no spaces. 
+            '''
+            #print('running')
+            if   map[self.iterateRow*numberOfCol+self.iterateCol] == '*':
+                #print('*******************************************')
+                '''
+                If the Robot is the current data point then it prints the robot character '*'
+                '''
+                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="red")
+            elif map[self.iterateRow*numberOfCol+self.iterateCol]== '1':
+                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="white")
+                #print('111111111111111111111111111111111111111')
+            else:
+                #print('0')
+                self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="black")
+
+            self.iterateCol +=1
+            
+            if (self.iterateRow+1)*(self.iterateCol) == numberOfElements:
+                '''
+                If map complete we exit
+                '''
+                exitFlag = 1
+            elif self.iterateCol == numberOfCol:
+                '''
+                otherwise if the end of a row has been reached we move to the next row
+                '''
+                self.iterateRow +=1 
+                self.iterateCol = 0
+            
+        
+        return   
+        
+        
+        
+        
+        
 #********************************************************************************************************************************************************************************
 #                                                Test code
 #********************************************************************************************************************************************************************************
@@ -485,19 +629,47 @@ if __name__ == '__main__':
     scanMain123.posY=array.array('f',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5,10,-9.6])    
     scanMain123.headingPlusServoAngle=array.array('f',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
     scanMain123.distance=array.array('f',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
+    
 
+    changeMap = 1
+    if changeMap == 1:
+        mapHeight = 10        # 10#30      #5        # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
+        mapWidth =  10        #10 #30      #5        # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
+        resolution = .302*.5  #.305*.5     #.305*.5 # .305*.5 #.302#Test with .5 #meters Even fraction Note: see previous note 
+        
+        X = 31*resolution  # 31*resolution#14*resolution
+        Y =-12*resolution  #-12*resolution #resolution*-7
+        
+        position.pos = {'x': X, 'y':Y} 
+        
+        scanMain123.posX=array.array('f',[x*resolution for x in [6,7,10,10,10,10,0,1,12,-10, -10,-11,-12,-10,-10,11,12,13,5,0,0,-10,32,22,30,20,28,26,24,18,16,14,12,10,28,31,26,29,28,0,0,-2,-4,-12,-12,-14,-14,-30,-28,-26,-24,-24,-24,-24,-30,-28,-26,-24,-24,-24,-24,9,7,3,3,10,10,10,9,15,16,17,18,0,-2,-3,-2,0,10,12,14,16]])
+        scanMain123.posY=array.array('f',[y*resolution for y in [3,3,10,11,12,10,0,1,0,0,-6,-6,-6,-9,-11,-9,-9,-9,-3,-8,-7,3,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-5,-3,10,12,14,16,18,-3,31,29,31,31,29,31,29,0,0,0,0,2,4,6,-6,-6,-6,-6,-8,-10,-12,1,-3,-3,2,9,7,5,4,30,30,30,30,-30,-29,-27,-25,-24,-31,-29,-27,-25]])    
+        scanMain123.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
+        scanMain123.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
+    
+    else:
+        scanMain123.posX=array.array('f',[1,2,1,5,5.5,-4.5,-5,0,0,0,0,1,0,-1,0,.5,0,-.5,0,10,-9.6])
+        scanMain123.posY=array.array('f',[1,1,2,0,0,0,0,0,5,5.5,-4.5,-5,0,1,0,-1,0,.5,0,-.5,10,-9.6])    
+        scanMain123.headingPlusServoAngle=array.array('f',[-33,-33,-33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
+        scanMain123.distance=array.array('f',[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.
+
+        
+
+    
+    
+    
     #create test map
     mapMain123 = mapObj(mapHeight, mapWidth, resolution) 
     #Test run mapTask()
     mapMain123.mapTask(scanMain123)
     #Print Map 
     
-    mapMain123.printMap(position.pos)
+    #mapMain123.printMap(position.pos)
     
     #***********************************************************
     # Test SaveMap commented so it does not spam current directory******************
     #*****************************************************
-    mapMain123.saveMap(0)
+    mapMain123.saveMap(1)
     
     
     
@@ -512,9 +684,13 @@ if __name__ == '__main__':
     a= mapMain123.readPointXY(0,5.5)
     print('(0,5.5) bit:',a)
     #fancy Map test type = 0
-    mapMain123.printMapFancy(position.pos,1)
+    #mapMain123.printMapFancy(position.pos,1)
+    #mapMain123.printMapGUI(position.pos)
+    mapMain123.printSavedMap()
+    
+    
     
     import sys
-    print('mapMain123',sys.getsizeof(mapMain123))
-    print('mapMain123.map',sys.getsizeof(mapMain123.map))
-    print('mapMain123.writeMap',sys.getsizeof(mapMain123.writeMap))
+    # print('mapMain123',sys.getsizeof(mapMain123))
+    # print('mapMain123.map',sys.getsizeof(mapMain123.map))
+    # print('mapMain123.writeMap',sys.getsizeof(mapMain123.writeMap))

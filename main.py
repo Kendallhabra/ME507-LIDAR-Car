@@ -4,9 +4,6 @@
 Main
 This file does a thing...
 '''
-#pyb.delay(1000)
-#print('START')
-#pyb.delay(1000)
 
 import time
 import pyb
@@ -16,8 +13,8 @@ import gc
 import position
 import encoder
 import statusLight
-#print('IMPORTS DONE')
-#pyb.delay(1000)
+import scan
+# import mapping
 
 micropython.alloc_emergency_exception_buf(100)
 
@@ -52,41 +49,29 @@ pins = {
 
 pyb.Pin.dict(pins)
 motorA = pyb.Pin("Motor PWM A", pyb.Pin.OUT_PP)
-# motorB = pyb.Pin("Motor PWM B", pyb.Pin.OUT_PP)
 motorA.value(0)
-# motorB.value(1)
 
 mtrPower = 0
 mtrPowerDir = 1
-#pyb.delay(1000)
-#print('creating mtrTimer')
 mtrTimer = pyb.Timer(4, freq = 1000)
-#pyb.delay(1000)
-#print('creating mtrPWM')
 mtrPWM = mtrTimer.channel(2, pyb.Timer.PWM, pin = pins["Motor PWM B"], pulse_width=0)
-#pyb.delay(1000)
-#print('setting PWP to 0')
 mtrPWM.pulse_width_percent(0)
 
 encoderTask = encoder.EncoderTask(pins["Encoder A"], pins["Encoder B"])
 positionTask = position.PositionTask(encoderTask)
 statusLightTask = statusLight.StatusLightTask(pins["LED R"], pins["LED G"], pins["LED B"])
+scanTask = scan.ScanTask()
+mappingTask = mapping.mabObj(30, 30, 0.151)
 
 def coerce(x, a, b):
 	return min(b, max(x, a))
 
 mode = 0
-def setMode(newMode):
-	global mode
-	mode = newMode
-	print(mode)
 
 def startMode(line):
 	global mode
-	encoderTask.count = 0
+	# encoderTask.count = 0
 	mode = 1
-	print(mode)
-	encCounts()
 
 def stopMode(line):
 	global mode
@@ -182,8 +167,8 @@ def getVoltage():
 
 def setLight():
 	statusLightTask.rNew = randInt(0, 101)
-	statusLightTask.gNew = randInt(0, 101)
-	statusLightTask.bNew = randInt(0, 101)
+	statusLightTask.gNew = randInt(0, 2)
+	statusLightTask.bNew = randInt(0, 2)
 
 # Each list in tasks holds [function, period in ms, calls, priority].
 # Calls starts at 0 and is used to control function calls.
@@ -200,6 +185,8 @@ tasks = [
 	[statusLightTask.run, 10, 0, 0],
 	[setMotor, 100, 0, 5],
 	[setLight, 1000, 0, 5],
+	[scanTask.run, 100, 0, 5],
+#	[mapTask.mapTask, 100, 0, 5],
 #	[setServo, 2000, 0, 0],
 	]
 

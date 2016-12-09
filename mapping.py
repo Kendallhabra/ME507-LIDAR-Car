@@ -205,10 +205,10 @@ class mapObj(object):
             #print('Bit: ',value)
             
         return value
-        
+    '''    
     def printMap(self,dictionary): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
         '''
-        Prints the Map in the best readable formate I have found so far without 3rd party modules
+        #Prints the Map in the best readable formate I have found so far without 3rd party modules
         '''
         print('\n********************Printing map*********************\n')
         print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
@@ -222,11 +222,11 @@ class mapObj(object):
         exitFlag = 0
         while exitFlag == 0:
             '''
-            Iterates through each bit printing only the bit with no spaces. 
+            #Iterates through each bit printing only the bit with no spaces. 
             '''
             if self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
                 '''
-                If the Robot is the current data point then it prints the robot character '*'
+                #If the Robot is the current data point then it prints the robot character '*'
                 '''
                 print('*', end="")
             else:
@@ -235,19 +235,19 @@ class mapObj(object):
             
             if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:
                 '''
-                If map complete we exit
+                #If map complete we exit
                 '''
                 exitFlag = 1
             elif self.iterateCol == self.arrayWidth:
                 '''
-                otherwise if the end of a row has been reached we move to the next row
+                #otherwise if the end of a row has been reached we move to the next row
                 '''
                 self.iterateRow +=1 
                 self.iterateCol = 0
                 print(end="\n")
         print('\n')
         return   
-    
+    '''
     def saveMap(self,overWriteFile = 0,dictionary = False):
 
         #If code is on pyboard it changes /sd directory
@@ -378,10 +378,10 @@ class mapObj(object):
             self.runTime = pyb.millis() + self.servoWait
         return
     
-    
+    '''
     def printMapFancy(self,dictionary,fill=0,legend=1): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
         '''
-        Prints the Map in the best readable formate I have found so far without 3rd party modules
+        #Prints the Map in the best readable formate I have found so far without 3rd party modules
         '''
         if legend == 1:
             print('\n********************Printing map*********************\n')
@@ -393,7 +393,7 @@ class mapObj(object):
 
         if fill == 1:
             '''
-            Based on the input the fill type is selected
+            #Based on the input the fill type is selected
             '''
             self.fillType = '0'
             self.emptyType = ' '
@@ -410,7 +410,7 @@ class mapObj(object):
         iter = 0
         while iter < self.arrayWidth:
             '''
-            Prints map boarder
+            # Prints map boarder
             '''
             print('*',end="")
             iter +=1
@@ -418,7 +418,7 @@ class mapObj(object):
         
         while exitFlag == 0:
             '''
-            Iterates through each bit printing only the bit with no spaces. 
+            #Iterates through each bit printing only the bit with no spaces. 
             '''
             if self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
                 print(self.robot, end="")
@@ -443,7 +443,7 @@ class mapObj(object):
             iter +=1
         print(end='\n')
         return  
-        
+    '''    
     def readPoint(self,point):
         '''
         reads map based on bitarray coordinates aka element number
@@ -454,9 +454,10 @@ class mapObj(object):
             value = 1
        
         return value   
+    '''
     def printMapGUI(self,dictionary): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
         '''
-        Prints the Map in the best readable formate I have found so far without 3rd party modules
+        #Prints the Map in the best readable formate I have found so far without 3rd party modules
         '''
         # print('\n********************Printing map*********************\n')
         # print('Map width:',round(self.arrayWidth*self.resolution,1),'m Map Length:', round(self.arrayLength*self.resolution,1),'m Resolution', round(self.resolution,4),'m\n')
@@ -478,11 +479,11 @@ class mapObj(object):
         mapPixels = 4
         while exitFlag == 0:
             '''
-            Iterates through each bit printing only the bit with no spaces. 
+            #Iterates through each bit printing only the bit with no spaces. 
             '''
             if self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
                 '''
-                If the Robot is the current data point then it prints the robot character '*'
+                #If the Robot is the current data point then it prints the robot character '*'
                 '''
                 self.rect = self.canvas.create_rectangle(mapPixels*self.iterateCol   ,mapPixels*self.iterateRow   ,   mapPixels*(self.iterateCol+1)   ,   mapPixels*(self.iterateRow +1)  , outline="black", fill="red")
             elif self.map[self.iterateRow*self.arrayLength+self.iterateCol]==1:
@@ -495,12 +496,12 @@ class mapObj(object):
             
             if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:
                 '''
-                If map complete we exit
+                #If map complete we exit
                 '''
                 exitFlag = 1
             elif self.iterateCol == self.arrayWidth:
                 '''
-                otherwise if the end of a row has been reached we move to the next row
+                #otherwise if the end of a row has been reached we move to the next row
                 '''
                 self.iterateRow +=1 
                 self.iterateCol = 0
@@ -508,7 +509,7 @@ class mapObj(object):
             #self.root.update()
         
         return   
-        
+     '''   
         
         
         

@@ -7,22 +7,18 @@ includes both a DC motor and a shaft encoder.
 class moveObj(object):
     '''
     '''
+
+    direction = 0
+    power = 0
     
     def __init__(self, motorPinA, motorPinB):
-        self.distance = 0
+        self.motorA = pyb.Pin("Motor PWM A", pyb.Pin.OUT_PP)
+        self.motorA.value(0)
         return
-    
-    def setPWM(self, direction, dutyCycle):
-        pass
 
-    def getDistance(self):
-        pass
+    def run():
+        self.motorA.value(self.direction)
 
-    def resetDistance(self):
-        pass
-
-    def setBrake(self, brakeStatus):
-        pass
 
 if __name__ == '__main__':
     print('Running Test Code for: motor.py')

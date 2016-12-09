@@ -24,11 +24,11 @@ class StatusLightTask(object):
         self.rPWM.pulse_width_percent(0)
 
         self.gTimer = pyb.Timer(1, freq = 1000)
-        self.gPWM = self.rTimer.channel(2, pyb.Timer.PWM, pin = _pinG)
+        self.gPWM = self.rTimer.channel(2, pyb.Timer.PWM_INVERTED, pin = _pinG)
         self.gPWM.pulse_width_percent(0)
 
         self.bTimer = pyb.Timer(1, freq = 1000)
-        self.bPWM = self.rTimer.channel(3, pyb.Timer.PWM, pin = _pinB)
+        self.bPWM = self.rTimer.channel(3, pyb.Timer.PWM_INVERTED, pin = _pinB)
         self.bPWM.pulse_width_percent(0)
 
         return

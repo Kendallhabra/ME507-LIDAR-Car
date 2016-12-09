@@ -4,7 +4,7 @@ This file holds all information regarding the sensors and scanning
 '''
 import array
 
-class scanTask(object):
+class ScanTask(object):
     '''
     '''
     

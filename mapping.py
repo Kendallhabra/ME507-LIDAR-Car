@@ -256,7 +256,7 @@ class mapObj(object):
             save_path = os.getcwd()
             
         else:
-            pyboardSD = '/sd'
+            pyboardSD = ''
             save_path = os.getcwd()+pyboardSD 
 
         name_of_file = "Map0"
@@ -321,7 +321,7 @@ class mapObj(object):
                 save_path = os.getcwd()
                 
             else:
-                pyboardSD = '/sd'
+                pyboardSD = ''
                 save_path = os.getcwd()+pyboardSD 
 
             name_of_file = "Map0"
@@ -339,42 +339,47 @@ class mapObj(object):
                 i +=1
 
             print('Writing file'+ name_of_file+'.txt ...')    
-            completeName = os.path.join(save_path, name_of_file+".txt")         
-            mapFile = open(completeName, "w")
+            completeName = os.path.join(save_path, name_of_file+".txt")
+            if save_path == '/sd' or __name__ == '__main__':
+                mapFile = open(completeName, "w")
 
-            mapString = '<'+str(self.resolution)+'>'
-            self.iterateCol = 0
-            self.iterateRow = 0
-            exitFlag = 0
-            while exitFlag == 0:
-                '''
-                Iterates through each bit printing only the bit with no spaces. 
-                '''
-                if dictionary != False and self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
+                mapString = '<'+str(self.resolution)+'>'
+                self.iterateCol = 0
+                self.iterateRow = 0
+                exitFlag = 0
+                while exitFlag == 0:
                     '''
-                    If the Robot is the current data point then it prints the robot character '*'
+                    Iterates through each bit printing only the bit with no spaces. 
                     '''
-                    mapString = mapString+'*'
-                else:
-                    mapString = mapString+str(self.map[self.iterateRow*self.arrayLength+self.iterateCol])#printing a single bit
-                self.iterateCol +=1
+                    if dictionary != False and self.arrayElements - (round(dictionary['x']/self.resolution)*-1+self.arrayWidth/2 + 1 + (round(dictionary['y']/self.resolution)+self.arrayLength/2-1)*self.arrayLength) == self.iterateRow*self.arrayLength+self.iterateCol:
+                        '''
+                        If the Robot is the current data point then it prints the robot character '*'
+                        '''
+                        mapString = mapString+'*'
+                    else:
+                        mapString = mapString+str(self.map[self.iterateRow*self.arrayLength+self.iterateCol])#printing a single bit
+                    self.iterateCol +=1
+                    
+                    if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:
+                        '''
+                        If map complete we exit
+                        '''
+                        exitFlag = 1
+                    elif self.iterateCol == self.arrayWidth:
+                        '''
+                        otherwise if the end of a row has been reached we move to the next row
+                        '''
+                        self.iterateRow +=1 
+                        self.iterateCol = 0
+                        mapString = mapString+"\n"
+                        
                 
-                if (self.iterateRow+1)*(self.iterateCol) == self.arrayElements:
-                    '''
-                    If map complete we exit
-                    '''
-                    exitFlag = 1
-                elif self.iterateCol == self.arrayWidth:
-                    '''
-                    otherwise if the end of a row has been reached we move to the next row
-                    '''
-                    self.iterateRow +=1 
-                    self.iterateCol = 0
-                    mapString = mapString+"\n"
-            mapFile.write(mapString)
+                mapFile.write(mapString)
 
-            mapFile.close()
-            print('Done') 
+                mapFile.close()
+                print('Done') 
+            else:
+                print('Directory not /sd!!!!!!!!!!!!!')
             self.runTime = pyb.millis() + self.servoWait
         return
     

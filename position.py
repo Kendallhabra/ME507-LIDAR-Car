@@ -29,6 +29,7 @@ class PositionTask(object):
         self.bno.begin()
         self.lastTime = pyb.millis()
         self.encoder = _encoder
+        #self.distTraveled = 0 #linear distance 
         return
 
     def run(self):
@@ -52,6 +53,7 @@ class PositionTask(object):
         # self.v[1] += self.a[1] * t
 
         s = self.encoder.count / countsPerInch
+        #self.distTraveled += s
         self.encoder.count = 0 #NOTE: This line makes it impossible to use encoder values for other calculations
 
         self.pos["x"] += s * math.cos(math.radians(ang[0]))

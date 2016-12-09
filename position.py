@@ -51,11 +51,11 @@ class PositionTask(object):
         # self.v[0] += self.a[0] * t
         # self.v[1] += self.a[1] * t
 
-        v = self.encoder.count/(t * countsPerInch)
+        s = self.encoder.count / countsPerInch
         self.encoder.count = 0 #NOTE: This line makes it impossible to use encoder values for other calculations
 
-        self.pos["x"] += v * math.cos(math.radians(ang[0]))
-        self.pos["y"] += v * math.sin(math.radians(ang[0]))
+        self.pos["x"] += s * math.cos(math.radians(ang[0]))
+        self.pos["y"] += s * math.sin(math.radians(ang[0]))
 
         self.pos["heading"] = ang[0]
         self.pos["roll"] = ang[1]

@@ -64,9 +64,11 @@ class mapObj(object):
             self.map[rowIter*self.arrayWidth] = 1
             self.map[rowIter*self.arrayWidth +self.arrayWidth-1] = 1
             rowIter +=1
-            
+        
+        self.xyList = []
+        
         #Create an intial timer count
-        if __name__ != '__main__':
+        if __name__ != '__main__' and os.getcwd() =='/':
             self.saveMapInterval = 10000 #ms or 10 seconds till next save
             self.runTime = pyb.millis() + self.saveMapInterval
 
@@ -79,7 +81,7 @@ class mapObj(object):
         #print('mapTask')
         #self.printMap()
         self.writeMap(scanMain)
-        if __name__ != '__main__':
+        if __name__ != '__main__' or __name__ =='/':
             self.saveMapTimed(1) #1 means it will overwrite last saved map so no backups
         return
 
@@ -115,6 +117,11 @@ class mapObj(object):
                 self.dataX = float(format(self.dataX, '.4f')) #**********This tries to eliminate as many duplicate enteries as possible by rounding******
                 self.dataY = self.posY + self.distance*math.sin(self.headingPlusServoAngle)
                 self.dataY = float(format(self.dataY, '.4f'))
+                #<p,dataX,dataY>
+                
+                self.xyList.append(['<p,'+str(self.dataX)+','+str(self.dataY)+'>'])
+                #print(self.xyList)
+                
                 
                 self.newDataPt = [self.dataX,self.dataY]
                 #print('new point',self.newDataPt)
@@ -241,7 +248,7 @@ class mapObj(object):
     def saveMap(self,overWriteFile = 0,dictionary = False):
 
         #If code is on pyboard it changes /sd directory
-        if __name__ == '__main__':
+        if __name__ == '__main__'or os.getcwd() != '/':
             pyboardSD = ''
             save_path = os.getcwd()
             
@@ -266,7 +273,6 @@ class mapObj(object):
         print('Writing file'+ name_of_file+'.txt ...')    
         completeName = os.path.join(save_path, name_of_file+".txt")         
         mapFile = open(completeName, "w")
-        #************************************************************************************************************************
 
         mapString = ""
         self.iterateCol = 0
@@ -332,7 +338,6 @@ class mapObj(object):
             print('Writing file'+ name_of_file+'.txt ...')    
             completeName = os.path.join(save_path, name_of_file+".txt")         
             mapFile = open(completeName, "w")
-            #************************************************************************************************************************
 
             mapString = ""
             self.iterateCol = 0

@@ -355,7 +355,7 @@ class navObj():
             way as it did in simulation. The logics of switching directings was included because when switching logics from normal to expoler the robot may not have moved and the logic may
             not have changed. This because as a last resort of the robot does not move under normal logics the robot switchs to explore which will get the robot moving again.
             '''
-            print('update waypoint!!!!')
+            #print('update waypoint!!!!')
             #******************************************************************************************
             #                           Explorer
             #***************************************************************************************
@@ -650,7 +650,7 @@ class navObj():
             If the waypoint is the same as the robot location the waypoint is updated in next cycle
             '''
             self.nothingHappened = 1
-            print('nothing happened updatewaypoint')
+            #print('nothing happened updatewaypoint')
             
         #Robot navigation History 
         '''
@@ -680,6 +680,7 @@ class navObj():
 #                                                Test code
 #********************************************************************************************************************************************************************************
 if __name__ == '__main__':  
+    print(__name__)
     '''
     Runs only if this file is main
     '''
@@ -709,6 +710,8 @@ if __name__ == '__main__':
     
     crazy = 1 # did to set promp height to atleast 5000???
     
+    
+    
     if crazy == 1: 
         '''
         Only cray people would print a 66x66 character map to screen 123 times 
@@ -735,15 +738,18 @@ if __name__ == '__main__':
         nothingHappenedCounter = 0
         navMain.wayPointdistance = 1
         
-        numberOfIterations = 146   #146#123 at 9999
-        
+        numberOfIterations = 1000   #146#123 at 9999
+
+        import os 
+        import sys
+        import time
+
+
         while counter < numberOfIterations: 
             ##print('\nIteration', counter, '***************************************************')
             navMain.navTask(position.pos,mapMain123)
             mapMain123.printMapFancy(position.pos,0,0)
             position.pos = {'x': navMain.wayPoint[0], 'y':navMain.wayPoint[1]}
-            
-            
             
             counter +=1
             #print('position',[navMain.currentX,navMain.currentY],'wayPoint',[navMain.wayPointSteps[0],navMain.wayPointSteps[1]])  
@@ -763,10 +769,23 @@ if __name__ == '__main__':
             #print('explorerSouth',navMain.explorerSouth)
             #print('exploroerEast',navMain.explorerEast)
             #print('nothingHappended',navMain.nothingHappened)
-            if navMain.nothingHappened == 1:
-                nothingHappenedCounter +=1
+            # if navMain.nothingHappened == 1:
+                # nothingHappenedCounter +=1
+            
+            time.sleep(.05)
+            os.system('cls' if os.name=='nt' else 'clear')   
+            
         
-        print('#ofnothingHappens',nothingHappenedCounter,'in ', numberOfIterations, 'iterations')
+        
+        
+            
+            
+        mapMain123.saveMap(1)
+        
+        
+        
+        
+        #print('#ofnothingHappens',nothingHappenedCounter,'in ', numberOfIterations, 'iterations')
         #Results 2 in 1000 steps so very small probability of this problem.
         
         
@@ -774,7 +793,7 @@ if __name__ == '__main__':
         
         #Testing memory Usage******************************************************************************************************************************************************
         
-        import sys
+        
         
         print('\nMemory Test******************************************')
         print('navMain',sys.getsizeof(navMain))

@@ -8,9 +8,8 @@ class moveObj(object):
     '''
     '''
     
-    def __init__(self, encPinA, encPinB, motorPinA, motorPinB, motorPinErr, ):
+    def __init__(self, motorPinA, motorPinB):
         self.distance = 0
-        # Set up encoder.
         return
     
     def setPWM(self, direction, dutyCycle):
@@ -22,13 +21,8 @@ class moveObj(object):
     def resetDistance(self):
         pass
 
-    def encoderISR(self):
-        pass
-
     def setBrake(self, brakeStatus):
         pass
 
-    
-    
 if __name__ == '__main__':
     print('Running Test Code for: motor.py')

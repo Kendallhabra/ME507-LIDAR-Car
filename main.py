@@ -11,9 +11,10 @@ import micropython
 import gc
 
 import position
+import encoder
+import statusLight
 
 micropython.alloc_emergency_exception_buf(100)
-
 
 pins = {
 	"Start Btn": pyb.Pin.board.Y1,
@@ -44,34 +45,104 @@ pins = {
 	"Rangefinder 5": pyb.Pin.board.X22,
 }
 
-
 pyb.Pin.dict(pins)
 motorA = pyb.Pin("Motor PWM A", pyb.Pin.OUT_PP)
-motorB = pyb.Pin("Motor PWM B", pyb.Pin.OUT_PP)
+# motorB = pyb.Pin("Motor PWM B", pyb.Pin.OUT_PP)
 motorA.value(0)
-motorB.value(1)
+# motorB.value(1)
 
+mtrPower = 0
+mtrPowerDir = 1
 
-#bno = imu.BNO055()
-#print(bno.begin())
+mtrTimer = pyb.Timer(4, freq = 1000)
+mtrPWM = mtrTimer.channel(2, pyb.Timer.PWM, pin = pins["Motor PWM B"])
+mtrPWM.pulse_width_percent(0)
+
+encoderTask = encoder.EncoderTask(pins["Encoder A"], pins["Encoder B"])
+positionTask = position.PositionTask(encoderTask)
+statusLightTask = statusLight.StatusLightTask(pins["LED R"], pins["LED G"], pins["LED B"])
+
+def coerce(x, a, b):
+	return min(b, max(x, a))
+
+mode = 0
+def setMode(newMode):
+	global mode
+	mode = newMode
+	print(mode)
+
+def startMode(line):
+	global mode
+	mode = 1
+	print(mode)
+
+def stopMode(line):
+	global mode
+	if mode == 0:
+		encoderTask.count = 0
+		positionTask.pos["x"] = 0
+        positionTask.pos["y"] = 0
+	mode = 0
+	print(mode)
+
+ext = pyb.ExtInt(pins["Start Btn"], pyb.ExtInt.IRQ_FALLING, pyb.Pin.PULL_NONE, startMode)
+ext = pyb.ExtInt(pins["Stop Btn"], pyb.ExtInt.IRQ_FALLING, pyb.Pin.PULL_NONE, stopMode)
+
+batVoltageADC = pyb.ADC(pins["Battery Voltage"])
+batVoltage = 0
+
+bluetooth = pyb.UART(2, 9600)
+bluetooth.init(9600, bits=8, parity=None, stop=1)
 
 servoAngle = 45
 servoHead = pyb.Servo(1)
 servoSteer = pyb.Servo(2)
 
-# servoSteer.angle(servoAngle)
+servoHead.angle(0)
+servoSteer.angle(0)
 
-positionTask = position.PositionTask()
+def randInt(a, b):
+	return int(pyb.rng()*((b-a)/1073741824)+a)
 
 def read():
-	print(positionTask.pos[x], ", ", positionTask.pos[y])
+#	print(positionTask.pos["x"], ", ", positionTask.pos["y"])
 	#print(bno.read_euler())
 	#print(bno.read_quaternion())
 	pass
+def setMotor():
+	global mtrPower, mtrPowerDir
+	if batVoltage < 5 or mode == 0:
+		mtrPower = 0
+		mtrPowerDir = 1
+		mtrPWM.pulse_width_percent(0)
+		return
+
+	if mtrPower == 100:
+		mtrPowerDir = -1
+	elif mtrPower == 0:
+		mtrPowerDir = 1
+	mtrPower += mtrPowerDir
+	mtrPWM.pulse_width_percent(50)
+def encCounts():
+	print("Encoder Counts:", encoderTask.count)
 def toggleLED():
 	pyb.LED(4).toggle()
 def sayHello():
-	print("Hello world!")
+	#print("Hello world!")
+	#print(str(randInt(0, 255)))
+	bluetooth.write("<")
+	#bluetooth.write(str(randInt(0, 255)))
+	bluetooth.write(str(int(positionTask.pos["x"])))
+	bluetooth.write(",")
+	#bluetooth.write(str(randInt(0, 255)))
+	bluetooth.write(str(int(positionTask.pos["y"])))
+	bluetooth.write(",")
+	bluetooth.write("255")
+	bluetooth.write(",")
+	bluetooth.write(str(int(positionTask.pos["heading"])))
+	bluetooth.write(">")
+	#bluetooth.write("\033[")
+	# <c#,#,#,#>
 def sayTime():
 	pass
 	# print(pyb.millis())
@@ -79,24 +150,35 @@ def garbageCollect():
 	gc.collect()
 def setServo():
 	global servoAngle
+	if batVoltage < 5:
+		return
 	servoHead.angle(servoAngle)
 	servoAngle = 0 - servoAngle
-	
-	
+def getVoltage():
+	global batVoltage
+	batVoltage = batVoltageADC.read() * 0.00447
+	print("Battery Voltage:", batVoltage)
 
-
-
+def setLight():
+	statusLightTask.r = (statusLightTask.r + randInt(0, 101))/2
+	statusLightTask.g = (statusLightTask.g + randInt(0, 101))/2
+	statusLightTask.b = (statusLightTask.b + randInt(0, 101))/2
 
 # Each list in tasks holds [function, period in ms, calls, priority].
 # Calls starts at 0 and is used to control function calls.
 # Setting a higher priority will overwrite a lower priority in a given call of mainLoop.
 tasks = [
-	[read, 1000, 0, 0],
-	[toggleLED, 100, 0, 1],
-	[sayHello, 100000, 0, 0],
-	[sayTime, 2000, 0, 0],
-	[garbageCollect, 1000, 0, 0],
-	[positionTask.run(), 10, 0, 0],
+#	[read, 1000, 0, 0],
+	[encCounts, 5000, 0, 5],
+	[toggleLED, 100, 0, 10],
+	[sayHello, 500, 0, 5],
+	[sayTime, 2000, 0, 5],
+	[garbageCollect, 1000, 0, 1],
+	[getVoltage, 5000, 0, 5],
+	[positionTask.run, 10, 0, 5],
+	[statusLightTask.run, 10, 0, 0],
+	[setMotor, 100, 0, 5],
+	[setLight, 10, 0, 5],
 #	[setServo, 2000, 0, 0],
 	]
 
@@ -115,8 +197,6 @@ def mainLoop():
 			tasks[taskNum][2] = int(curTime/tasks[taskNum][1])
 
 gc.collect()
-
-
 
 
 print("Running")

@@ -129,6 +129,13 @@ def setMotor():
 		mtrPowerDir = 1
 		mtrPWM.pulse_width_percent(0)
 		return
+	""" Closed Loop Control INCOMPLETE
+	headingError = '''desired heading minus''' positionTask.pos['heading']
+	distToTarget = ( (positionTask.pos['x'] '''- Xsetpt''' )^2 + (positionTask.pos['y'] '''- Ysetpt''' )^2 )
+	
+	steerAngle = headingError #Solve for proper steer angle here!!!
+	servoSteer.angle(steerAngle)
+	"""
 	
 	if mtrPower == 100:
 		mtrPowerDir = -1

@@ -4,6 +4,9 @@
 Main
 This file does a thing...
 '''
+#pyb.delay(1000)
+#print('START')
+#pyb.delay(1000)
 
 import time
 import pyb
@@ -13,6 +16,8 @@ import gc
 import position
 import encoder
 import statusLight
+#print('IMPORTS DONE')
+#pyb.delay(1000)
 
 micropython.alloc_emergency_exception_buf(100)
 
@@ -53,9 +58,14 @@ motorA.value(0)
 
 mtrPower = 0
 mtrPowerDir = 1
-
+#pyb.delay(1000)
+#print('creating mtrTimer')
 mtrTimer = pyb.Timer(4, freq = 1000)
-mtrPWM = mtrTimer.channel(2, pyb.Timer.PWM, pin = pins["Motor PWM B"])
+#pyb.delay(1000)
+#print('creating mtrPWM')
+mtrPWM = mtrTimer.channel(2, pyb.Timer.PWM, pin = pins["Motor PWM B"], pulse_width=0)
+#pyb.delay(1000)
+#print('setting PWP to 0')
 mtrPWM.pulse_width_percent(0)
 
 encoderTask = encoder.EncoderTask(pins["Encoder A"], pins["Encoder B"])
@@ -73,15 +83,17 @@ def setMode(newMode):
 
 def startMode(line):
 	global mode
+	encoderTask.count = 0
 	mode = 1
 	print(mode)
+	encCounts()
 
 def stopMode(line):
 	global mode
-	if mode == 0:
+	'''if mode == 0:
 		encoderTask.count = 0
 		positionTask.pos["x"] = 0
-        positionTask.pos["y"] = 0
+        	positionTask.pos["y"] = 0'''
 	mode = 0
 	print(mode)
 
@@ -110,17 +122,19 @@ def read():
 	#print(bno.read_quaternion())
 	pass
 def setMotor():
+	#print('settingMotor... encoder-',encoderTask.count)
 	global mtrPower, mtrPowerDir
 	if batVoltage < 5 or mode == 0:
 		mtrPower = 0
 		mtrPowerDir = 1
 		mtrPWM.pulse_width_percent(0)
 		return
-
+	
 	if mtrPower == 100:
 		mtrPowerDir = -1
 	elif mtrPower == 0:
 		mtrPowerDir = 1
+	
 	mtrPower += mtrPowerDir
 	mtrPWM.pulse_width_percent(50)
 def encCounts():
@@ -169,12 +183,12 @@ def setLight():
 # Setting a higher priority will overwrite a lower priority in a given call of mainLoop.
 tasks = [
 #	[read, 1000, 0, 0],
-	[encCounts, 5000, 0, 5],
+	[encCounts, 1000, 0, 5],
 	[toggleLED, 100, 0, 10],
-	[sayHello, 500, 0, 5],
-	[sayTime, 2000, 0, 5],
+#	[sayHello, 500, 0, 5],
+#	[sayTime, 2000, 0, 5],
 	[garbageCollect, 1000, 0, 1],
-	[getVoltage, 5000, 0, 5],
+	[getVoltage, 1000, 0, 5],
 	[positionTask.run, 10, 0, 5],
 	[statusLightTask.run, 10, 0, 0],
 	[setMotor, 100, 0, 5],

@@ -58,17 +58,22 @@ def reader(): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
             print('Number of Rows',numberOfRows)
             print('Number of Elements', numberOfElements)
             print('Map width:',round(numberOfCol*resolution,1),'m Map Length:', round(numberOfRows*resolution,1),'m Resolution', round(resolution,4),'m')
-            print('Map width:',round(numberOfCol*resolution*3.28,1),'ft Map Length:', round(numberOfRows*resolution*3.28,1),'ft Resolution', round(resolution*3.28,4),'ft\n')
+            print('Map width:',round(numberOfCol*resolution*3.28,1),'ft Map Length:', round(numberOfRows*resolution*3.28,1),'ft Resolution', round(resolution*3.28,4),'ft Resolution', round(resolution*3.28*12,4),'in\n')
             # print(numberOfElements)
             # print(numberOfRows)
             # print('numberOfRows',numberOfRows)
         
-        mapPixels = 4 #number of pixels for each quadrant
+        
+        
+        mapPixels = int(input('Number of pixels per square on map (must be an interge! 10 is recommended)'))#number of pixels for each quadrant 4 - 20 is recommended
         
         root = tkinter.Tk()
         canvas = tkinter.Canvas(root)
         canvas.pack()
-        canvas.config(width=numberOfRows*mapPixels-2, height=numberOfCol*mapPixels-2)
+        
+        width=int((numberOfRows*mapPixels-2))
+        height = int((numberOfCol*mapPixels-2))
+        canvas.config(width=width,height=height)
         
         
         iterateCol = 0
@@ -111,6 +116,6 @@ def reader(): #!!!!!!!!!!!!may not work in micro python!!!!!!!!!!!!!!!!!!
         return           
         
 reader()
-
+input("Press Enter to close...")
         
         

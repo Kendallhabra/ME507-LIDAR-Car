@@ -1,11 +1,12 @@
 # position.py
-'''
+'''package docstring
 This file holds the information for the position task.
 '''
-
+import os
 import math
-import imu
-import pyb
+if os.getcwd() == '/' or os.getcwd() == '/sd': #allows for testing on computer without modules that can only run on the pyboard
+    import imu
+    import pyb
 
 class PositionTask(object):
     '''
@@ -13,7 +14,7 @@ class PositionTask(object):
     
     lastTime = 0
     # v = [0, 0]
-
+    global pos
     pos = {
         "x": 0,
         "y": 0,
@@ -56,12 +57,12 @@ class PositionTask(object):
         #self.distTraveled += s
         self.encoder.count = 0 #NOTE: This line makes it impossible to use encoder values for other calculations
 
-        self.pos["x"] += s * math.cos(math.radians(ang[0]))
-        self.pos["y"] += s * math.sin(math.radians(ang[0]))
+        pos["x"] += s * math.cos(math.radians(ang[0]))
+        pos["y"] += s * math.sin(math.radians(ang[0]))
 
-        self.pos["heading"] = ang[0]
-        self.pos["roll"] = ang[1]
-        self.pos["pitch"] = ang[2]
+        pos["heading"] = ang[0]
+        pos["roll"] = ang[1]
+        pos["pitch"] = ang[2]
     
 if __name__ == '__main__':
     positionTask = PositionTask()

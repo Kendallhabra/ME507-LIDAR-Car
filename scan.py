@@ -31,7 +31,8 @@ class ScanTask(object):
             #rangeFinder.RangeFinder( pins["Rangefinder 4"] , [0, 0, 0] ), # Top Left
             #rangeFinder.RangeFinder( pins["Rangefinder 3"] , [0, 55, -2]), # Bottom Left
             #rangeFinder.RangeFinder( pins["Rangefinder 2"] , [0, 0, 0] ), # Top Right
-            rangeFinder.RangeFinder( pins["Rangefinder 3"] , [7, 50.0, -1.97] )  # Bottom Right
+            # rangeFinder.RangeFinder( pins["Rangefinder 3"] , [7, 50.0, -1.97] )  # Bottom Right
+            rangeFinder.RangeFinder( pins["Rangefinder 3"] , [7, 40950.0, 1613.43] )  # Bottom Right
         ]
         
         self.servo.setAngle(self.angles[0])

@@ -6,7 +6,7 @@ import re
 import tkinter
 
 
-'''
+'''package docstring
 Creates the map first time map is run and ajusts the array size (lenght and width) in the case that they are not interger values.
 '''
 saveMapFlag = 0

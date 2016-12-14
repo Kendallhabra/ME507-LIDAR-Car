@@ -1,33 +1,35 @@
 #ZacharyArnott
-#File*************************************************************************
 
 # Navigation Task and Functions
 
-'''
+'''package docstring
 Navigation
 This task and associated functions are designed to determine a wayPointSteps from current robot position and map 
 '''
 
 import mapping
 import math
-
+import position
+import scan
 class navObj():
     #print('Navigation Object created')
-    
+    global wayPoint
+    wayPoint = [0,0]
     def __init__(self,mapHeight, mapWidth, resolution):
         '''
         On startup navigation initalizes for the map size
         '''
+        
+        
         self.mapHeight = mapHeight
         self.mapWidth = mapWidth
         self.resolution = resolution
-        self.lastDirection = 0 #lastDirection arrugment (1,2,3,4) => (N,W,S,E) 
+        self.lastDirection = 0 
+        #lastDirection arrugment (1,2,3,4) => (N,W,S,E) 
         self.arrayLength = int(mapHeight/resolution)
         self.arrayWidth = int(mapWidth/resolution)
         self.arrayElements = self.arrayLength*self.arrayWidth
         self.middleElement = round(self.arrayElements/2+self.arrayWidth/2)
-        #self.initialScanWidth = round(1.5/resolution)
-        ##print(self.initialScanWidth)
         self.numberRowAboveOrgin = (self.arrayElements/2)/self.arrayWidth
         self.numberRowBlowOrgin = self.numberRowAboveOrgin - 1
         self.numberColumnLeft = self.arrayWidth/2-1
@@ -68,14 +70,15 @@ class navObj():
         self.explorerEast = 2
         self.nothingHappened = 0 #ensure the robot does not stop if new waypoint is not set for some reason. It ensure logic runs on next cycle
         
-    def navTask(self,dictionary,mapMain):
+    def navTask(self):
         '''
         Map task scans map and determines the wayPointSteps to be set.
         '''
-        self.scanMap(dictionary,mapMain)
+        dictionary = position.pos
+        self.scanMap(dictionary)
         self.setWayPoint()
     
-    def scanMap(self,dictionary,mapMain):
+    def scanMap(self,dictionary):
         '''
         Looks up the surrounding points in the map and determines which ones have objects.
         '''
@@ -106,7 +109,7 @@ class navObj():
             Searches the north direction by iterating through each element in a column until an object is found in one column
             '''
             try:
-                value = mapMain.map[int(self.arrayElements - ((round(self.currentX)+currentScan)*-1+self.arrayWidth/2 + 1 + ((round(self.currentY)+iObject)+self.arrayLength/2-1)*self.arrayLength))]
+                value = mapping.map[int(self.arrayElements - ((round(self.currentX)+currentScan)*-1+self.arrayWidth/2 + 1 + ((round(self.currentY)+iObject)+self.arrayLength/2-1)*self.arrayLength))]
             except IndexError:
                 value = 1
                 
@@ -337,12 +340,13 @@ class navObj():
         self.explorerCounter +=1
         
         
-               
-        if self.explorerCounter == -1:
+              
+        if self.explorerCounter == -1: #-1 default 
             '''
             number of counts till explorer is triggered -1 mean we dont want it triggered ensure that you put a limiter on it if you dont want it running till the next object is found
             '''  
-            self.explorerFlag = 1    
+            self.explorerFlag = 1
+            self.explorerCounter = 5
 
         if (self.lastPosition != [self.currentX,self.currentY] or self.lastNorth != self.north or self.lastNorthWest != self.northWest or self.lastWest != self.west or 
             self.lastSouthWest != self.southWest or self.lastSouth != self.south or self.lastEast != self.east or self.lastNorthEast != self.northEast or 
@@ -444,7 +448,7 @@ class navObj():
                     self.explorerFlag = 0
                     self.explorerCounter = 0
                 #**********turn of explorer control*******************    
-                if (self.explorerCounter == 4 ) :#or (self.explorerCounter == 22) #number of steps till expolered turned off
+                if (self.explorerCounter == 4 ) or (self.explorerCounter == 20): #number of steps till expolered turned off
                     '''
                     If the explorer counter is on it stops it and changes to normal logic
                     '''
@@ -606,7 +610,7 @@ class navObj():
                 #************************
                 #case 9 north/south door*****************
                 elif (self.west == 1 ) and (self.east == 1 ): 
-                    '''  W          This is an example of the scanned logic and required quardrant responses. T is object full, F is no object, W is waypoint direction. blank spots are not checked
+                    ''' W          This is an example of the scanned logic and required quardrant responses. T is object full, F is no object, W is waypoint direction. blank spots are not checked
                         T*T
                           '''
                     if self.lastDirection == 1 and self.north ==0:
@@ -673,8 +677,8 @@ class navObj():
         self.lastExplorerWest = self.explorerWest 
         self.lastExplorerSouth = self.explorerSouth 
         self.lastExplorerEast = self.explorerEast 
-        
-        self.wayPoint = [self.wayPointSteps[0]*self.resolution,self.wayPointSteps[1]*self.resolution] #converts waypoint in map steps to meters
+        global wayPoint
+        wayPoint = [self.wayPointSteps[0]*self.resolution,self.wayPointSteps[1]*self.resolution] #converts waypoint in map steps to meters
          
 #********************************************************************************************************************************************************************************
 #                                                Test code
@@ -688,18 +692,18 @@ if __name__ == '__main__':
     import array
     
     #don't Change or it will messup current validation based on array size
-    mapHeight = 5        #30      #5        # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
-    mapWidth =  5        #30      #5        # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
-    resolution = .305*.5 #.305*.5 # .305*.5 #.302#Test with .5 #meters Even fraction Note: see previous note 
+    # mapHeight = 15        #30      #5        # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
+    # mapWidth =  15        #30      #5        # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
+    # resolution = .304*.5 #.305*.5 # .305*.5 #.302#Test with .5 #meters Even fraction Note: see previous note 
         
     #Test scan array********************************************************
-    class scan():
-        pass
+    #class scan():
+        #pass
         #print('scan Object created')
     
-    scanMain123 = scan()
-    class position():
-        pass
+    #scanTask = scan()
+    #class position():
+        #pass
     #*************************************************************************************************
     #  Test navigation assumes Robot only makes it 2 feet from its current waypoint before its updated
     #*************************************************************************************************
@@ -714,122 +718,48 @@ if __name__ == '__main__':
     
     if crazy == 1: 
         '''
-        Only cray people would print a 66x66 character map to screen 123 times 
+        Only cray people would print a 66x66 character map to screen 123 times to screen. I now clear the sreen
+        each time so you can see the robot move around the screen.
         '''
-        mapHeight = 10        # 10#30      #5        # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
-        mapWidth =  10        #10 #30      #5        # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
-        resolution = .302*.5  #.305*.5     #.305*.5 # .305*.5 #.302#Test with .5 #meters Even fraction Note: see previous note 
+        mapHeight = 15        # 10#30      #5        # 40 #Test with 10 #meters (height) Ensure whole numbers 20X20,10x10,11x11, 11x9 I want to avoid  10.5x10.5
+        mapWidth =  15        #10 #30      #5        # 40 #Test with 10 #meters (witth) Note: base 2 would be best 2 ,4, 6, who....
+        resolution = .304*.7  #.305*.5     #.305*.5 # .305*.5 #.302#Test with .5 #meters Even fraction Note: see previous note 
         
         X = 31*resolution  # 31*resolution#14*resolution
         Y =-12*resolution  #-12*resolution #resolution*-7
         
-        position.pos = {'x': X, 'y':Y} 
+        position.pos['x'] = X
+        position.pos['y'] = Y
         
-        scanMain123.posX=array.array('f',[x*resolution for x in [6,7,10,10,10,10,0,1,12,-10, -10,-11,-12,-10,-10,11,12,13,5,0,0,-10,32,22,30,20,28,26,24,18,16,14,12,10,28,31,26,29,28,0,0,-2,-4,-12,-12,-14,-14,-30,-28,-26,-24,-24,-24,-24,-30,-28,-26,-24,-24,-24,-24,9,7,3,3,10,10,10,9,15,16,17,18,0,-2,-3,-2,0,10,12,14,16]])
-        scanMain123.posY=array.array('f',[y*resolution for y in [3,3,10,11,12,10,0,1,0,0,-6,-6,-6,-9,-11,-9,-9,-9,-3,-8,-7,3,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-5,-3,10,12,14,16,18,-3,31,29,31,31,29,31,29,0,0,0,0,2,4,6,-6,-6,-6,-6,-8,-10,-12,1,-3,-3,2,9,7,5,4,30,30,30,30,-30,-29,-27,-25,-24,-31,-29,-27,-25]])    
-        scanMain123.headingPlusServoAngle=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note we could combine the angles in sensing.    
-        scanMain123.distance=array.array('f',[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]) #Note I antisipate that we will choose between the two IR sensers close and far range using range limits and returing that distance. So sensing converts the raw data.    
-        mapMain123 = mapping.mapObj(mapHeight, mapWidth, resolution)
+        mappingTask = mapping.mapObj(mapHeight, mapWidth, resolution)
         navMain = navObj(mapHeight, mapWidth, resolution)
         #print('scan width 0000000',round(7*resolution,2),'m',round(7*resolution*3.28,2),'ft') 
          
-        mapMain123.writeMap(scanMain123)
+        mappingTask.writeMap()
         counter = 0
         nothingHappenedCounter = 0
         navMain.wayPointdistance = 1
         
-        numberOfIterations = 1000   #146#123 at 9999
-
+        numberOfIterations = 1000   # of iteration of navigation
         import os 
         import sys
         import time
-
-
+        import mappingPrinter
+        global wayPoint
+        pinter = mappingPrinter.printObj(mapHeight, mapWidth, resolution)
+        
+        os.system("mode con cols=100 lines=73") #sets prompt to fit map
+        mappingTask.saveMap(1)
+        
         while counter < numberOfIterations: 
             ##print('\nIteration', counter, '***************************************************')
-            navMain.navTask(position.pos,mapMain123)
-            mapMain123.printMapFancy(position.pos,0,0)
-            position.pos = {'x': navMain.wayPoint[0], 'y':navMain.wayPoint[1]}
-            
-            counter +=1
-            #print('position',[navMain.currentX,navMain.currentY],'wayPoint',[navMain.wayPointSteps[0],navMain.wayPointSteps[1]])  
-            #print('north',navMain.north)
-            #print('northWest',navMain.northWest)
-            #print('west',navMain.west)
-            #print('southWest',navMain.southWest)
-            #print('south',navMain.south)
-            #print('east',navMain.east)
-            #print('northEast',navMain.northEast)
-            #print('northclose',navMain.northClose)
-            #print('westClose',navMain.westClose)
-            #print('southClose',navMain.southClose)
-            #print('eastClose',navMain.eastClose)
-            #print('explorerNorth',navMain.explorerNorth)
-            #print('explorerWest',navMain.explorerWest)
-            #print('explorerSouth',navMain.explorerSouth)
-            #print('exploroerEast',navMain.explorerEast)
-            #print('nothingHappended',navMain.nothingHappened)
-            # if navMain.nothingHappened == 1:
-                # nothingHappenedCounter +=1
-            
-            time.sleep(.05)
+            navMain.navTask()
+            pinter.printMapFancy(position.pos,0,0)
+            position.pos['x'] = wayPoint[0]
+            position.pos['y'] = wayPoint[1]
+            counter +=1 
+            time.sleep(.2)
             os.system('cls' if os.name=='nt' else 'clear')   
-            
-        
-        
-        
-            
-            
-        mapMain123.saveMap(1)
-        
-        
-        
-        
-        #print('#ofnothingHappens',nothingHappenedCounter,'in ', numberOfIterations, 'iterations')
-        #Results 2 in 1000 steps so very small probability of this problem.
-        
-        
-        
-        
-        #Testing memory Usage******************************************************************************************************************************************************
-        
-        
-        
-        print('\nMemory Test******************************************')
-        print('navMain',sys.getsizeof(navMain))
-        print('navMain.setWayPoint',sys.getsizeof(navMain.setWayPoint))
-        print('navMain.scanMap',sys.getsizeof(navMain.scanMap))
-        print('scanMain123',sys.getsizeof(scanMain123))
-        print('scanMain123.posX',sys.getsizeof(scanMain123.posX))
-        
-        
-        northCheckList =        [[-1,3],[0,3],[1,3],[-1,2],[0,2],[1,2],[-1,1],[0,1],[1,1]]
-        westCheckList =         [[-3,1],[-2,1],[-1,1],[-3,0],[-2,0],[-1,0],[-3,-1],[-2,-1],[-1,-1]]
-        southCheckList =        [[-1,-3],[0,-3],[1,-3],[-1,-2],[0,-2],[1,-2],[-1,-1],[0,-1],[1,-1]]
-        eastCheckList =         [[3,1],[2,1],[1,1],[3,0],[2,0],[1,0],[3,-1],[2,-1],[1,-1]]
-        
-        explorerNorthCheckList =        [          [2,0],[2,1],[2,1]]        #,[-2,0],[-2,1],[-2,2]
-        explorerWestCheckList =         [        [0,2],[-1,2],[-2,2]]        #,[0,-2],[-1,-2],[-2,-2]
-        explorerSouthCheckList =        [     [-2,0],[-2,-1],[-2,-2]]        #,[2,0],[2,-1],[2,-2]
-        explorerEastCheckList =         [       [0,-2],[1,-2],[2,-2]]        #[0,2],[1,2],[2,2],
-        
-        northWestCheckList =    [[-3,3],[-2,3],[-3,2],[-2,2],[-1,2],[-2,1],[-1,1]]#,[0,1],[-1,0]]
-        southWestCheckList =    [[-3,-3],[-2,-3],[-3,-2],[-2,-2],[-1,-2],[-2,-1],[-1,-1]]#,[0,-1],[-1,0]]
-        southEastCheckList =    [[3,-3],[2,-3],[3,-2],[2,-2],[1,-2],[2,-1],[1,-1]]#,[0,-1],[1,0]]
-        northEastCheckList =    [[3,3],[2,3],[3,2],[2,2],[1,2],[2,1],[1,1]]#,[0,1],[1,0]]
-        
-        #These check if the robot is directly by the wall and logic tries to move robot to be atleast 1 element way from wall
-        northCloseCheck =       [[0,1]]     #[[-1,1],[0,1],[1,1]]
-        westCloseCheck =        [[-1,0]]    #[[-1,-1],[-1,0],[-1,1]]
-        southCloseCheck =       [[0,-1]]    #[[-1,-1],[0,-1],[1,-1]]
-        eastCloseCheck =        [[1,0]]     #[[1,-1],[1,0],[1,1]]
-        
-        
-        print('northCheckList', sys.getsizeof(westCheckList))
-        print('westCheckList', sys.getsizeof(westCheckList))
-        print('southWestCheckList', sys.getsizeof(westCheckList))
-        
-        
-        
-        
+        pinter.printMapFancy(position.pos,0,1)   
+       
         
